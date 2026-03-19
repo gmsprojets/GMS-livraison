@@ -1,0 +1,22 @@
+{
+  "name": "GMS Livraison",
+  "short_name": "GMS",
+  "description": "GMS Livraison Express Niamey",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050d1a",
+  "theme_color": "#050d1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/DWMcym3K/IMG-20260303-WA0000.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "https://i.postimg.cc/DWMcym3K/IMG-20260303-WA0000.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

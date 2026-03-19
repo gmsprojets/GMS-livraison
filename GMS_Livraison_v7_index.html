@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GMS Livraison">
+<meta name="theme-color" content="#050d1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="https://i.postimg.cc/DWMcym3K/IMG-20260303-WA0000.jpg">
+<link rel="apple-touch-icon" href="https://i.postimg.cc/DWMcym3K/IMG-20260303-WA0000.jpg">
+<link rel="icon" type="image/jpeg" href="https://i.postimg.cc/DWMcym3K/IMG-20260303-WA0000.jpg">
+<title>GMS Livraison v7 — Niamey</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --navy-950: #050d1a;
+    --navy-900: #091426;
+    --navy-800: #0d1f3c;
+    --navy-700: #112850;
+    --navy-600: #1a3a6e;
+    --blue-500: #1e6cc8;
+    --blue-400: #2e82e8;
+    --blue-300: #5fa3f0;
+    --blue-100: #d0e8ff;
+    --accent:   #f0a500;
+    --green:    #22c55e;
+    --green-dim:#166534;
+    --red:      #ef4444;
+    --red-dim:  #7f1d1d;
+    --orange:   #f97316;
+    --white:    #ffffff;
+    --gray-100: #e8f0fb;
+    --gray-200: #c8d8f0;
+    --gray-400: #8fa8cc;
+    --gray-500: #5a789e;
+    --gray-600: #364e6e;
+    --border:   rgba(255,255,255,0.08);
+    --border-blue: rgba(30,108,200,0.35);
+    --shadow:   0 2px 12px rgba(0,0,0,0.4);
+    --shadow-lg:0 8px 32px rgba(0,0,0,0.5);
+    --radius:   14px;
+    --radius-sm:8px;
+    --radius-lg:18px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    min-height:100vh;
+    background: var(--navy-950);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(30,108,200,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(30,108,200,0.08) 0%, transparent 60%);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--white);
+    padding-bottom: 90px;
+    overscroll-behavior: none;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: rgba(9,20,38,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-blue);
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo { width:38px; height:38px; border-radius:10px; object-fit:cover; border:1.5px solid var(--border-blue); }
+  .header-info { flex:1; }
+  .header-title { font-size:15px; font-weight:700; letter-spacing:-0.3px; color:var(--white); }
+  .header-sub { font-size:11px; color:var(--gray-400); margin-top:2px; display:flex; align-items:center; gap:6px; }
+  .sync-dot { width:7px; height:7px; border-radius:50%; background:var(--green); display:inline-block; }
+  .sync-dot.offline { background:var(--red); }
+  .sync-dot.syncing { background:var(--orange); animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .refresh-btn { background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--gray-400); cursor:pointer; font-size:18px; padding:6px 10px; border-radius:var(--radius-sm); transition:all 0.2s; }
+  .refresh-btn:active { background:rgba(30,108,200,0.2); color:var(--blue-300); }
+
+  /* ── FLASH ── */
+  .flash { margin:12px 16px 0; padding:12px 16px; border-radius:var(--radius-sm); font-size:13px; font-weight:500; text-align:center; display:none; }
+  .flash.show { display:block; }
+  .flash.ok      { background:rgba(34,197,94,0.12);  border:1px solid rgba(34,197,94,0.3); color:#86efac; }
+  .flash.error   { background:rgba(239,68,68,0.12);  border:1px solid rgba(239,68,68,0.3); color:#fca5a5; }
+  .flash.loading { background:rgba(30,108,200,0.12); border:1px solid var(--border-blue);  color:var(--blue-300); }
+  .flash.warning { background:rgba(249,115,22,0.12); border:1px solid rgba(249,115,22,0.3);color:#fdba74; }
+
+  /* ── PAGES ── */
+  .page { display:none; padding:16px; animation:fadeIn 0.2s ease; }
+  .page.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── STATS ── */
+  .stats-row { display:flex; gap:10px; margin-bottom:14px; }
+  .stat-card {
+    flex:1; border-radius:var(--radius); padding:14px 10px; text-align:center;
+    border:1px solid var(--border-blue);
+  }
+  .stat-card.green  { background:rgba(34,197,94,0.08);  border-color:rgba(34,197,94,0.2); }
+  .stat-card.red    { background:rgba(239,68,68,0.08);  border-color:rgba(239,68,68,0.2); }
+  .stat-card.blue   { background:rgba(30,108,200,0.1);  border-color:var(--border-blue); }
+  .stat-card.orange { background:rgba(249,115,22,0.08); border-color:rgba(249,115,22,0.2); }
+  .stat-val   { font-size:18px; font-weight:700; margin-bottom:3px; letter-spacing:-0.5px; }
+  .stat-label { font-size:10px; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.8px; font-weight:500; }
+
+  /* ── BÉNÉFICE CARD ── */
+  .benefice-card {
+    border-radius:var(--radius-lg); padding:20px; text-align:center; margin-bottom:14px;
+    border: 1px solid var(--border-blue);
+    background: linear-gradient(135deg, rgba(13,31,60,0.9), rgba(9,20,38,0.9));
+    position:relative; overflow:hidden;
+  }
+  .benefice-card::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:120px; height:120px; border-radius:50%;
+    background:rgba(30,108,200,0.08); pointer-events:none;
+  }
+  .benefice-card.pos { border-color:rgba(34,197,94,0.25); }
+  .benefice-card.pos::before { background:rgba(34,197,94,0.06); }
+  .benefice-card.neg { border-color:rgba(239,68,68,0.25); }
+  .benefice-val { font-size:28px; font-weight:700; margin-bottom:4px; letter-spacing:-1px; }
+  .benefice-label { font-size:11px; color:var(--gray-400); text-transform:uppercase; letter-spacing:1.5px; font-weight:600; }
+
+  /* ── OBJECTIF ── */
+  .objectif-card { border-radius:var(--radius); padding:16px; margin-bottom:14px; background:rgba(30,108,200,0.08); border:1px solid var(--border-blue); }
+  .objectif-top  { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .objectif-label { font-size:12px; color:var(--gray-400); text-transform:uppercase; letter-spacing:0.8px; font-weight:600; }
+  .objectif-vals  { font-size:13px; font-weight:600; color:var(--blue-300); }
+  .progress-bar   { background:rgba(255,255,255,0.08); border-radius:100px; height:6px; overflow:hidden; }
+  .progress-fill  { height:100%; border-radius:100px; background:linear-gradient(90deg,var(--blue-500),var(--blue-300)); transition:width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .progress-fill.atteint { background:linear-gradient(90deg,#16a34a,var(--green)); }
+  .objectif-pct   { font-size:12px; color:var(--gray-500); margin-top:6px; text-align:right; font-weight:500; }
+
+  /* ── ALERTES ── */
+  .alerte-card { border-radius:var(--radius); padding:14px 16px; margin-bottom:14px; }
+  .alerte-card.danger  { background:rgba(239,68,68,0.08);  border:1px solid rgba(239,68,68,0.25); }
+  .alerte-card.warning { background:rgba(249,115,22,0.08); border:1px solid rgba(249,115,22,0.25); }
+  .alerte-card.ok      { background:rgba(34,197,94,0.08);  border:1px solid rgba(34,197,94,0.2); }
+  .alerte-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+  .alerte-sub   { font-size:12px; color:var(--gray-400); line-height:1.5; }
+
+  /* ── CARDS ── */
+  .card { background:rgba(13,31,60,0.6); border:1px solid var(--border); border-radius:var(--radius-lg); padding:18px; margin-bottom:14px; }
+  .card-title { font-size:10px; font-weight:700; color:var(--gray-500); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:16px; }
+  .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+
+  /* ── LABELS & INPUTS ── */
+  label { font-size:12px; color:var(--gray-400); margin-bottom:6px; display:block; font-weight:500; letter-spacing:0.2px; }
+  input, select {
+    width:100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--white);
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    margin-bottom: 14px;
+    -webkit-appearance: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, background 0.2s;
+    font-weight: 400;
+  }
+  input:focus, select:focus {
+    border-color: var(--blue-400);
+    background: rgba(30,108,200,0.06);
+  }
+  input[type="date"] { color-scheme:dark; }
+  select { background-color:#091426; }
+  select option { background:#091426; color:var(--white); }
+  input::placeholder { color:var(--gray-600); }
+  .row2 { display:flex; gap:10px; }
+  .row2 > div { flex:1; min-width:0; }
+
+  /* ── AUTOCOMPLETE ── */
+  .ac-wrap { position:relative; margin-bottom:14px; }
+  .ac-wrap input { margin-bottom:0; }
+  .ac-list {
+    position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:500;
+    background:#0d1f3c; border:1px solid var(--border-blue);
+    border-radius:var(--radius-sm);
+    max-height:200px; overflow-y:auto; display:none;
+    box-shadow:var(--shadow-lg);
+  }
+  .ac-list.show { display:block; }
+  .ac-item {
+    padding:12px 14px; font-size:14px; cursor:pointer;
+    border-bottom:1px solid rgba(255,255,255,0.05); color:var(--white);
+    display:flex; justify-content:space-between; align-items:center;
+    transition:background 0.15s;
+  }
+  .ac-item:last-child { border-bottom:none; }
+  .ac-item:active { background:rgba(30,108,200,0.2); }
+  .ac-item-tel { font-size:11px; color:var(--gray-500); font-family:'DM Mono',monospace; }
+
+  /* ── TEL ROW ── */
+  .tel-row { display:flex; gap:8px; margin-bottom:14px; }
+  .tel-row input { margin-bottom:0; flex:1; }
+  .btn-call    { background:rgba(34,197,94,0.1);  border:1px solid rgba(34,197,94,0.25);  border-radius:var(--radius-sm); padding:12px 14px; color:var(--green); font-size:18px; cursor:pointer; transition:all 0.2s; }
+  .btn-contact { background:rgba(30,108,200,0.1); border:1px solid var(--border-blue); border-radius:var(--radius-sm); padding:12px 12px; color:var(--blue-300); font-size:13px; cursor:pointer; font-family:inherit; font-weight:600; white-space:nowrap; transition:all 0.2s; }
+  .btn-call:active, .btn-contact:active { opacity:0.7; }
+
+  /* ── STATUT BUTTONS ── */
+  .statut-row { display:flex; gap:8px; margin-bottom:14px; }
+  .statut-btn { flex:1; border-radius:var(--radius-sm); padding:10px 4px; text-align:center; font-size:12px; font-weight:600; cursor:pointer; border:1.5px solid transparent; font-family:inherit; transition:all 0.2s; }
+  .statut-btn.encours  { background:rgba(249,115,22,0.08); border-color:rgba(249,115,22,0.2); color:var(--orange); }
+  .statut-btn.livre    { background:rgba(34,197,94,0.08);  border-color:rgba(34,197,94,0.2);  color:var(--green); }
+  .statut-btn.annule   { background:rgba(239,68,68,0.08);  border-color:rgba(239,68,68,0.2);  color:var(--red); }
+  .statut-btn.selected.encours { background:rgba(249,115,22,0.2); border-color:var(--orange); }
+  .statut-btn.selected.livre   { background:rgba(34,197,94,0.2);  border-color:var(--green); }
+  .statut-btn.selected.annule  { background:rgba(239,68,68,0.2);  border-color:var(--red); }
+
+  /* ── RÉCURRENTS ── */
+  .recurrent-grid { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .recurrent-item { background:rgba(30,108,200,0.08); border:1px solid var(--border-blue); border-radius:var(--radius-sm); padding:12px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:background 0.2s; }
+  .recurrent-item:active { background:rgba(30,108,200,0.18); }
+  .recurrent-info { flex:1; }
+  .recurrent-name { font-size:13px; font-weight:600; }
+  .recurrent-detail { font-size:11px; color:var(--gray-400); margin-top:2px; }
+  .recurrent-prix { font-size:14px; font-weight:700; color:var(--green); }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width:100%;
+    background: linear-gradient(135deg, var(--blue-500), #1558a8);
+    border: none; border-radius:var(--radius); padding:15px;
+    color:#fff; font-weight:700; font-size:15px; cursor:pointer;
+    box-shadow: 0 4px 20px rgba(30,108,200,0.3);
+    margin-top:4px; font-family:'DM Sans',sans-serif;
+    letter-spacing:0.2px; transition:all 0.2s;
+  }
+  .btn-primary:active { transform:scale(0.98); opacity:0.9; }
+  .btn-secondary {
+    width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border);
+    border-radius:var(--radius); padding:13px; color:var(--gray-200); font-weight:600;
+    font-size:14px; cursor:pointer; margin-top:8px; font-family:'DM Sans',sans-serif; transition:all 0.2s;
+  }
+  .btn-secondary:active { background:rgba(255,255,255,0.1); }
+  .btn-danger  { background:rgba(239,68,68,0.1);  border:1px solid rgba(239,68,68,0.25);  border-radius:var(--radius-sm); padding:7px 12px; color:var(--red);      font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; transition:all 0.2s; }
+  .btn-edit    { background:rgba(30,108,200,0.1);  border:1px solid var(--border-blue);    border-radius:var(--radius-sm); padding:7px 12px; color:var(--blue-300); font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; transition:all 0.2s; }
+  .btn-livré   { background:rgba(34,197,94,0.1);   border:1px solid rgba(34,197,94,0.25);  border-radius:var(--radius-sm); padding:7px 12px; color:var(--green);    font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; transition:all 0.2s; }
+  .btn-sms-dest   { background:rgba(249,115,22,0.1); border:1px solid rgba(249,115,22,0.25); border-radius:var(--radius-sm); padding:7px 12px; color:var(--orange); font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; }
+  .btn-sms-client { background:rgba(30,108,200,0.1); border:1px solid var(--border-blue); border-radius:var(--radius-sm); padding:7px 12px; color:var(--blue-300); font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; }
+  .btn-pdf { width:100%; background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:var(--radius); padding:13px; color:var(--red); font-weight:600; font-size:14px; cursor:pointer; margin-top:8px; font-family:inherit; }
+  .btn-save { background:rgba(30,108,200,0.15); border:1px solid var(--border-blue); border-radius:var(--radius-sm); padding:12px 16px; color:var(--blue-300); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; white-space:nowrap; transition:all 0.2s; }
+  .btn-save:active { background:rgba(30,108,200,0.3); }
+
+  /* ── ITEMS ── */
+  .item {
+    background: rgba(13,31,60,0.5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .item:active { border-color: var(--border-blue); }
+  .item-top    { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+  .item-name   { font-weight:700; font-size:15px; color:var(--white); }
+  .item-sub    { font-size:12px; color:var(--gray-400); margin-bottom:4px; line-height:1.5; }
+  .item-bottom { display:flex; justify-content:space-between; align-items:center; margin-top:10px; flex-wrap:wrap; gap:6px; }
+  .item-time   { font-size:11px; color:var(--gray-600); font-family:'DM Mono',monospace; }
+  .item-actions { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+
+  /* ── DAY HEADERS ── */
+  .day-header {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 14px; margin-bottom:8px; margin-top:6px;
+    background: rgba(30,108,200,0.08);
+    border: 1px solid var(--border-blue);
+    border-radius: var(--radius-sm);
+  }
+  .day-date  { font-size:13px; font-weight:700; color:var(--blue-300); }
+  .day-stats { font-size:12px; color:var(--gray-500); font-weight:500; }
+  .day-total { font-size:13px; font-weight:700; color:var(--green); }
+
+  /* ── BADGES ── */
+  .badge { display:inline-block; border-radius:6px; padding:3px 10px; font-size:11px; font-weight:600; letter-spacing:0.2px; }
+  .badge-green  { background:rgba(34,197,94,0.12);  border:1px solid rgba(34,197,94,0.25);  color:#86efac; }
+  .badge-red    { background:rgba(239,68,68,0.12);  border:1px solid rgba(239,68,68,0.25);  color:#fca5a5; }
+  .badge-purple { background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.25); color:#c4b5fd; }
+  .badge-blue   { background:rgba(30,108,200,0.12); border:1px solid var(--border-blue);    color:var(--blue-300); }
+  .badge-orange { background:rgba(249,115,22,0.12); border:1px solid rgba(249,115,22,0.25); color:#fdba74; }
+
+  .montant-pos { font-weight:700; color:var(--green);  font-size:15px; letter-spacing:-0.3px; }
+  .montant-neg { font-weight:700; color:var(--red);    font-size:14px; }
+
+  /* ── RÉSUMÉ ROWS ── */
+  .resume-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
+  .resume-row:last-child { border-bottom:none; }
+  .resume-key { color:var(--gray-400); font-weight:400; }
+  .resume-val { font-weight:700; color:var(--white); }
+
+  .empty-state { text-align:center; color:var(--gray-600); padding:32px 20px; font-size:13px; font-weight:500; }
+
+  /* ── FILTERS ── */
+  .filter-bar { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+  .filter-btn { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:var(--radius-sm); padding:7px 13px; color:var(--gray-400); font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; transition:all 0.2s; }
+  .filter-btn.active { background:rgba(30,108,200,0.15); border-color:var(--blue-400); color:var(--white); font-weight:600; }
+  .filter-date { display:flex; gap:8px; margin-bottom:12px; }
+  .filter-date input { margin-bottom:0; font-size:12px; padding:8px 10px; }
+
+  .input-row { display:flex; gap:8px; margin-bottom:12px; }
+  .input-row input { margin-bottom:0; flex:1; }
+
+  /* ── CONFIRM OVERLAY ── */
+  .confirm-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(5,13,26,0.9); z-index:600; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(8px); }
+  .confirm-overlay.show { display:flex; }
+  .confirm-box { background:var(--navy-800); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius-lg); padding:26px; width:100%; max-width:320px; text-align:center; box-shadow:var(--shadow-lg); }
+  .confirm-title { font-size:17px; font-weight:700; margin-bottom:8px; }
+  .confirm-text  { font-size:13px; color:var(--gray-400); margin-bottom:22px; line-height:1.5; }
+  .confirm-btns  { display:flex; gap:10px; }
+  .confirm-btns button { flex:1; }
+  .btn-cancel      { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:var(--radius-sm); padding:13px; color:var(--white); font-size:14px; cursor:pointer; font-family:inherit; font-weight:500; }
+  .btn-confirm-del { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.35); border-radius:var(--radius-sm); padding:13px; color:var(--red); font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+
+  /* ── NAVBAR ── */
+  .navbar {
+    position:fixed; bottom:0; left:0; right:0;
+    background: rgba(5,13,26,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-blue);
+    display: flex; justify-content:space-around;
+    padding: 8px 0 max(14px,env(safe-area-inset-bottom)); z-index:200;
+  }
+  .nav-btn { display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:var(--gray-600); cursor:pointer; font-size:9px; padding:5px 8px; font-family:inherit; font-weight:500; transition:color 0.2s; }
+  .nav-btn.active { color:var(--blue-400); font-weight:700; }
+  .nav-icon { font-size:20px; }
+  a.call-link      { color:var(--green); text-decoration:none; font-weight:600; }
+  a.call-link-dest { color:var(--blue-300); text-decoration:none; font-weight:600; }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:8px; margin-bottom:16px; }
+  .tab-btn { flex:1; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; color:var(--gray-400); font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; text-align:center; transition:all 0.2s; }
+  .tab-btn.active { background:rgba(30,108,200,0.15); border-color:var(--blue-400); color:var(--white); }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+
+  /* ── MULTI-COLIS ── */
+  .colis-item { background:rgba(30,108,200,0.06); border:1px solid var(--border-blue); border-radius:var(--radius); padding:16px; margin-bottom:10px; }
+  .colis-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:13px; font-weight:700; color:var(--blue-300); }
+  .btn-add-colis { width:100%; background:transparent; border:1.5px dashed rgba(30,108,200,0.35); border-radius:var(--radius); padding:13px; color:var(--blue-400); font-size:14px; font-weight:600; cursor:pointer; margin-bottom:14px; font-family:inherit; transition:all 0.2s; }
+  .btn-add-colis:active { background:rgba(30,108,200,0.1); }
+  .btn-remove-colis { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:var(--radius-sm); padding:5px 10px; color:var(--red); font-size:12px; cursor:pointer; font-family:inherit; }
+  .groupe-badge { background:rgba(30,108,200,0.12); border:1px solid var(--border-blue); border-radius:6px; padding:3px 9px; font-size:11px; color:var(--blue-300); font-weight:600; }
+
+  /* ── TOTAL COLIS ── */
+  .colis-total-bar { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:var(--radius); padding:14px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+  .colis-total-label { font-size:12px; color:var(--gray-400); font-weight:500; }
+  .colis-total-val { font-size:19px; font-weight:700; color:var(--green); letter-spacing:-0.5px; }
+
+  /* ── NUMÉRO SUIVI ── */
+  .suivi-badge { background:rgba(30,108,200,0.1); border:1px solid var(--border-blue); border-radius:6px; padding:3px 9px; font-size:11px; color:var(--blue-300); font-weight:700; font-family:'DM Mono',monospace; letter-spacing:0.8px; }
+
+  /* ── EN ROUTE ── */
+  .btn-enroute { background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); border-radius:var(--radius-sm); padding:7px 12px; color:#c4b5fd; font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; }
+  .badge-enroute { background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.25); color:#c4b5fd; }
+
+  /* ── WHATSAPP ── */
+  .btn-wa-dest   { background:rgba(37,211,102,0.08); border:1px solid rgba(37,211,102,0.2); border-radius:var(--radius-sm); padding:7px 12px; color:#4ade80; font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; }
+  .btn-wa-client { background:rgba(37,211,102,0.06); border:1px solid rgba(37,211,102,0.15); border-radius:var(--radius-sm); padding:7px 12px; color:#4ade80; font-size:12px; cursor:pointer; font-family:inherit; font-weight:600; }
+
+  /* ── LIVREURS ── */
+  .livreur-card { background:rgba(30,108,200,0.06); border:1px solid var(--border-blue); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+  .livreur-nom { font-size:15px; font-weight:700; }
+  .livreur-meta { font-size:12px; color:var(--gray-400); margin-top:3px; }
+  .livreur-badge { background:rgba(30,108,200,0.12); border:1px solid var(--border-blue); border-radius:6px; padding:3px 9px; font-size:11px; color:var(--blue-300); font-weight:600; }
+
+  /* ── MODAL ── */
+  .modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(5,13,26,0.92); z-index:700; display:none; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; backdrop-filter:blur(8px); }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:var(--navy-800); border:1px solid var(--border-blue); border-radius:var(--radius-lg); padding:22px; width:100%; max-width:420px; margin:auto; box-shadow:var(--shadow-lg); }
+  .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .modal-title { font-size:17px; font-weight:700; }
+  .modal-close { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 12px; color:var(--gray-200); cursor:pointer; font-size:16px; }
+  .client-card { background:rgba(30,108,200,0.06); border:1px solid var(--border-blue); border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; cursor:pointer; transition:background 0.2s; }
+  .client-card:active { background:rgba(30,108,200,0.15); }
+  .client-nom { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .client-meta { font-size:12px; color:var(--gray-400); }
+</style>
+</head>
+<body>
+
+<div id="loading-screen" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;">
+  <img src="https://i.postimg.cc/DWMcym3K/IMG-20260303-WA0000.jpg" style="width:80px;height:80px;border-radius:16px;object-fit:cover;">
+  <div style="color:rgba(255,255,255,0.6);font-size:14px">Chargement...</div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="header">
+    <img src="https://i.postimg.cc/DWMcym3K/IMG-20260303-WA0000.jpg" class="header-logo">
+    <div class="header-info">
+      <div class="header-title">GMS Livraison</div>
+      <div class="header-sub">
+        <span class="sync-dot" id="sync-dot"></span>
+        <span id="sync-text">Connecté</span>
+      </div>
+    </div>
+    <button class="refresh-btn" onclick="loadData()">↻</button>
+  </div>
+
+  <div id="flash" class="flash"></div>
+
+  <!-- ═══ ACCUEIL ═══ -->
+  <div id="page-accueil" class="page active">
+    <!-- Alertes -->
+    <div id="alerte-vidange"></div>
+
+    <div class="stats-row">
+      <div class="stat-card green">
+        <div class="stat-val" id="acc-recettes">0</div>
+        <div class="stat-label">Frais livraison FCFA</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-val" id="acc-depenses">0</div>
+        <div class="stat-label">Dépenses FCFA</div>
+      </div>
+    </div>
+    <div class="benefice-card pos" id="acc-benefice-card">
+      <div class="benefice-val" id="acc-benefice">0 FCFA</div>
+      <div class="benefice-label">Bénéfice net</div>
+    </div>
+
+    <!-- Objectif -->
+    <div class="objectif-card">
+      <div class="objectif-top">
+        <span class="objectif-label">🎯 Objectif du mois</span>
+        <span class="objectif-vals" id="obj-vals">0 / 0 FCFA</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="obj-bar" style="width:0%"></div></div>
+      <div class="objectif-pct" id="obj-pct">—</div>
+    </div>
+
+    <!-- Épargne -->
+    <div class="objectif-card" style="background:rgba(39,174,96,0.1);border-color:rgba(39,174,96,0.3)">
+      <div class="objectif-top">
+        <span class="objectif-label">💰 Épargne</span>
+        <span class="objectif-vals" id="acc-epargne">0 FCFA</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill atteint" id="epargne-bar" style="width:0%"></div></div>
+      <div class="objectif-pct" id="epargne-pct">—</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Résumé activité</div>
+      <div class="resume-row"><span class="resume-key">Livraisons aujourd'hui</span><span class="resume-val" id="acc-liv-jour">0</span></div>
+      <div class="resume-row"><span class="resume-key">Recettes aujourd'hui</span><span class="resume-val" id="acc-rec-jour">0 FCFA</span></div>
+      <div class="resume-row"><span class="resume-key">Restantes pour objectif</span><span class="resume-val" id="acc-restantes">—</span></div>
+      <div class="resume-row"><span class="resume-key">Total livraisons</span><span class="resume-val" id="acc-nb-liv">0</span></div>
+      <div class="resume-row"><span class="resume-key">Moyenne / livraison</span><span class="resume-val" id="acc-moy">0 FCFA</span></div>
+    </div>
+
+    <div id="commandes-alert" style="display:none;background:rgba(30,108,200,0.1);border:1px solid rgba(30,108,200,0.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer" onclick="goPage('commandes')">
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">🔔 Nouvelles commandes clients !</div>
+      <div style="font-size:12px;color:var(--gray-400)" id="commandes-alert-txt">—</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📅 Livraisons par jour</div>
+      <div id="acc-par-jour"><div class="empty-state">Aucune livraison</div></div>
+    </div>
+
+    <button class="btn-primary" onclick="goPage('nouvelle')">+ Nouvelle livraison</button>
+    <button class="btn-secondary" onclick="ouvrirEspaceLivreur()" style="margin-top:8px">🛵 Espace livreur</button>
+  </div>
+
+  <!-- ═══ NOUVELLE LIVRAISON ═══ -->
+  <div id="page-nouvelle" class="page">
+    <!-- Livraisons récurrentes -->
+    <div class="card" id="recurrents-card">
+      <div class="card-title">⚡ Livraisons fréquentes</div>
+      <div id="recurrents-list"><div class="empty-state" style="padding:10px">Aucune livraison fréquente enregistrée</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="form-title">📦 Nouvelle livraison</div>
+      <input type="hidden" id="edit-id">
+
+      <label>Client *</label>
+      <div class="ac-wrap">
+        <input id="f-client" type="text" placeholder="Nom du client" autocomplete="off" oninput="acClient()" onfocus="acClient()">
+        <div class="ac-list" id="ac-client"></div>
+      </div>
+
+      <label>Téléphone du client</label>
+      <div class="tel-row">
+        <input id="f-tel-client" type="tel" placeholder="Ex: 90000000" inputmode="numeric">
+        <button class="btn-contact" onclick="chercherContact('f-tel-client','f-client')">👤</button>
+        <button class="btn-call" onclick="appeler('f-tel-client')">📞</button>
+      </div>
+
+      <label>Quartier de départ *</label>
+      <div class="ac-wrap">
+        <input id="f-depart" type="text" placeholder="Départ" autocomplete="off" oninput="acQuartier('f-depart','ac-depart')" onfocus="acQuartier('f-depart','ac-depart')">
+        <div class="ac-list" id="ac-depart"></div>
+      </div>
+
+      <label>Paiement</label>
+      <select id="f-paiement">
+        <option>Espèces</option>
+        <option>Mobile Money</option>
+        <option>Crédit</option>
+      </select>
+
+      <label>Statut</label>
+      <div class="statut-row">
+        <button class="statut-btn encours selected" id="s-encours" onclick="setStatut('En cours')">⏳ En cours</button>
+        <button class="statut-btn livre" id="s-livre" onclick="setStatut('Livré')">✅ Livré</button>
+        <button class="statut-btn annule" id="s-annule" onclick="setStatut('Annulé')">❌ Annulé</button>
+      </div>
+      <input type="hidden" id="f-statut" value="En cours">
+
+      <!-- COLIS -->
+      <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:8px;margin-top:4px">COLIS À LIVRER *</div>
+      <div id="colis-container"></div>
+      <button class="btn-add-colis" onclick="ajouterColis()">+ Ajouter un colis</button>
+      <div class="colis-total-bar" id="colis-total-bar" style="display:none">
+        <span class="colis-total-label">💰 Total frais de livraison</span>
+        <span class="colis-total-val" id="colis-total-val">0 FCFA</span>
+      </div>
+
+      <label>Livreur assigné</label>
+      <select id="f-livreur">
+        <option value="">— Vous-même —</option>
+      </select>
+
+      <label>Observations</label>
+      <input id="f-note" type="text" placeholder="Optionnel...">
+
+      <button class="btn-primary" id="form-submit-btn" onclick="soumettreFormulaire()">✅ Valider la livraison</button>
+      <button class="btn-secondary" id="save-recurrent-btn" onclick="sauvegarderRecurrent()" style="margin-top:8px">⚡ Enregistrer comme livraison fréquente</button>
+      <button class="btn-secondary" id="form-cancel-btn" style="display:none" onclick="annulerModification()">Annuler</button>
+    </div>
+  </div>
+
+  <!-- ═══ JOURNAL ═══ -->
+  <div id="page-journal" class="page">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="margin:0">📋 Journal</div>
+        <span class="badge badge-blue" id="journal-count">0</span>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('tout')" id="f-tout">Tout</button>
+        <button class="filter-btn" onclick="setFilter('aujourd')" id="f-aujourd">Aujourd'hui</button>
+        <button class="filter-btn" onclick="setFilter('semaine')" id="f-semaine">Semaine</button>
+        <button class="filter-btn" onclick="setFilter('mois')" id="f-mois">Mois</button>
+        <button class="filter-btn" onclick="setFilter('custom')" id="f-custom">📅</button>
+        <button class="filter-btn" onclick="setFilter('zone')" id="f-zone">🗺️ Par zone</button>
+      </div>
+      <div class="filter-date" id="filter-custom-dates" style="display:none">
+        <input type="date" id="date-debut" onchange="renderJournal()">
+        <input type="date" id="date-fin" onchange="renderJournal()">
+      </div>
+      <div id="journal-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MOTO & PLUS ═══ -->
+  <div id="page-moto" class="page">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="setTab('tab-vidange')">🔧 Vidange</button>
+      <button class="tab-btn" onclick="setTab('tab-carburant')">⛽ Carburant</button>
+      <button class="tab-btn" onclick="setTab('tab-depense')">💸 Dépense</button>
+    </div>
+
+    <!-- VIDANGE -->
+    <div id="tab-vidange" class="tab-content active">
+      <div id="alerte-vidange2"></div>
+      <div class="card">
+        <div class="card-title">🔧 Suivi vidange</div>
+        <label>Date de la dernière vidange</label>
+        <input type="date" id="vidange-date" style="margin-bottom:12px">
+        <label>Rappel dans combien de semaines ?</label>
+        <select id="vidange-semaines">
+          <option value="4">4 semaines (1 mois)</option>
+          <option value="6">6 semaines</option>
+          <option value="8">8 semaines (2 mois)</option>
+          <option value="12">12 semaines (3 mois)</option>
+        </select>
+        <button class="btn-primary" onclick="sauvegarderVidange()">✅ Enregistrer</button>
+      </div>
+    </div>
+
+    <!-- CARBURANT -->
+    <div id="tab-carburant" class="tab-content">
+      <div class="card">
+        <div class="card-title">⛽ Nouveau plein</div>
+        <div class="row2">
+          <div>
+            <label>Litres</label>
+            <input id="carb-litres" type="number" placeholder="Ex: 5" inputmode="decimal">
+          </div>
+          <div>
+            <label>Prix total (FCFA)</label>
+            <input id="carb-prix" type="number" placeholder="Ex: 3000" inputmode="numeric">
+          </div>
+        </div>
+        <label>Note</label>
+        <input id="carb-note" type="text" placeholder="Optionnel...">
+        <button class="btn-primary" onclick="ajouterCarburant()">✅ Enregistrer</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Statistiques carburant</div>
+        <div class="resume-row"><span class="resume-key">Ce mois</span><span class="resume-val" id="carb-mois">0 FCFA</span></div>
+        <div class="resume-row"><span class="resume-key">Total dépensé</span><span class="resume-val" id="carb-total">0 FCFA</span></div>
+        <div class="resume-row"><span class="resume-key">Total litres</span><span class="resume-val" id="carb-litres-total">0 L</span></div>
+        <div class="resume-row"><span class="resume-key">Prix moyen / litre</span><span class="resume-val" id="carb-moy">0 FCFA</span></div>
+        <div class="resume-row"><span class="resume-key">Nombre de pleins</span><span class="resume-val" id="carb-nb">0</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Historique pleins</div>
+        <div id="carb-list"><div class="empty-state">Aucun plein enregistré</div></div>
+      </div>
+    </div>
+
+    <!-- DEPENSE MOTO -->
+    <div id="tab-depense" class="tab-content">
+      <div class="card">
+        <div class="card-title">💸 Nouvelle dépense moto</div>
+        <label>Catégorie</label>
+        <select id="d-categorie">
+          <option>Carburant</option>
+          <option>Vidange</option>
+          <option>Réparation</option>
+          <option>Pneu</option>
+          <option>Pièce mécanique</option>
+          <option>Électricité</option>
+          <option>Autre</option>
+        </select>
+        <label>Montant (FCFA) *</label>
+        <input id="d-montant" type="number" placeholder="Ex: 2000" inputmode="numeric">
+        <label>Description / Note</label>
+        <input id="d-note" type="text" placeholder="Optionnel...">
+        <button class="btn-primary" onclick="ajouterDepense()">✅ Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ BILAN ═══ -->
+  <div id="page-bilan" class="page">
+    <div class="stats-row">
+      <div class="stat-card green">
+        <div class="stat-val" id="bil-recettes">0</div>
+        <div class="stat-label">Frais livraison FCFA</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-val" id="bil-depenses">0</div>
+        <div class="stat-label">Dépenses FCFA</div>
+      </div>
+    </div>
+    <div class="benefice-card pos" id="bil-benefice-card">
+      <div class="benefice-val" id="bil-benefice">0 FCFA</div>
+      <div class="benefice-label">Bénéfice net</div>
+    </div>
+
+    <!-- Objectif -->
+    <div class="card">
+      <div class="card-title">🎯 Objectif mensuel</div>
+      <div class="input-row">
+        <input type="number" id="obj-input" placeholder="Ex: 60000" inputmode="numeric">
+        <button class="btn-save" onclick="sauvegarderObjectif()">Définir</button>
+      </div>
+      <div class="objectif-card" style="margin-bottom:0">
+        <div class="objectif-top">
+          <span class="objectif-label">Ce mois</span>
+          <span class="objectif-vals" id="obj-vals2">0 / 0 FCFA</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="obj-bar2" style="width:0%"></div></div>
+        <div class="objectif-pct" id="obj-pct2">—</div>
+      </div>
+    </div>
+
+    <!-- Épargne -->
+    <div class="card">
+      <div class="card-title">💰 Épargne journalière</div>
+      <div class="input-row">
+        <input type="number" id="epargne-input" placeholder="Montant à épargner/jour" inputmode="numeric">
+        <button class="btn-save" onclick="sauvegarderEpargne()">Définir</button>
+      </div>
+      <div class="input-row">
+        <input type="number" id="epargne-objectif-input" placeholder="Objectif total épargne" inputmode="numeric">
+        <button class="btn-save" onclick="sauvegarderEpargneObjectif()">Définir</button>
+      </div>
+      <button class="btn-secondary" style="margin-top:0" onclick="ajouterEpargne()">+ Ajouter épargne du jour</button>
+      <div style="margin-top:12px">
+        <div class="resume-row"><span class="resume-key">Épargne totale</span><span class="resume-val" id="bil-epargne">0 FCFA</span></div>
+        <div class="resume-row"><span class="resume-key">Épargne ce mois</span><span class="resume-val" id="bil-epargne-mois">0 FCFA</span></div>
+        <div class="resume-row"><span class="resume-key">Objectif épargne</span><span class="resume-val" id="bil-epargne-obj">0 FCFA</span></div>
+      </div>
+    </div>
+
+    <!-- Suivi investissement moto -->
+    <div class="card">
+      <div class="card-title">🛵 Suivi investissement moto</div>
+      <div class="input-row">
+        <input type="number" id="invest-input" placeholder="Coût total de la moto" inputmode="numeric">
+        <button class="btn-save" onclick="sauvegarderInvestissement()">Définir</button>
+      </div>
+      <div class="resume-row"><span class="resume-key">Coût moto</span><span class="resume-val" id="invest-cout">0 FCFA</span></div>
+      <div class="resume-row"><span class="resume-key">Bénéfices générés</span><span class="resume-val" id="invest-benefices">0 FCFA</span></div>
+      <div class="resume-row"><span class="resume-key">Restant à récupérer</span><span class="resume-val" id="invest-restant">0 FCFA</span></div>
+      <div style="margin-top:10px">
+        <div class="progress-bar"><div class="progress-fill" id="invest-bar" style="width:0%"></div></div>
+        <div class="objectif-pct" id="invest-pct">0% remboursé</div>
+      </div>
+    </div>
+
+    <!-- Comparaison mois -->
+    <div class="card">
+      <div class="card-title">📊 Comparaison mois</div>
+      <div id="comp-mois"><div class="empty-state">Aucune donnée</div></div>
+    </div>
+
+    <!-- Export -->
+    <div class="card">
+      <div class="card-title">📄 Export</div>
+      <button class="btn-pdf" onclick="exporterPDF()">📄 Exporter le mois en PDF</button>
+    </div>
+
+    <!-- Dépenses -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="margin:0">Dépenses moto</div>
+        <span class="badge badge-red" id="bilan-count">0</span>
+      </div>
+      <div id="bilan-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ COMMANDES ═══ -->
+  <div id="page-commandes" class="page">
+    <div id="commandes-list"><div class="empty-state">Aucune commande reçue</div></div>
+  </div>
+
+  <!-- ═══ LIVREURS ═══ -->
+  <div id="page-livreurs" class="page">
+    <div class="card">
+      <div class="card-title">➕ Ajouter un livreur</div>
+      <div class="input-row">
+        <input id="livreur-nom-input" type="text" placeholder="Nom du livreur" style="margin-bottom:0">
+        <button class="btn-save" onclick="ajouterLivreur()">Ajouter</button>
+      </div>
+      <div class="input-row" style="margin-top:4px">
+        <input id="livreur-tel-input" type="tel" placeholder="Téléphone (optionnel)" inputmode="numeric" style="margin-bottom:0">
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title" style="margin:0">👷 Mes livreurs</div>
+        <span class="badge badge-blue" id="livreurs-count">0</span>
+      </div>
+      <div id="livreurs-list"><div class="empty-state">Aucun livreur enregistré</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📋 Livraisons par livreur aujourd'hui</div>
+      <div id="livreurs-stats"><div class="empty-state">Aucune donnée</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ CLIENTS ═══ -->
+  <div id="page-clients" class="page">
+    <div class="card">
+      <div class="card-title">🔍 Rechercher un client</div>
+      <input id="client-search" type="text" placeholder="Tapez un nom..." oninput="filtrerClients()" autocomplete="off">
+    </div>
+    <div id="clients-list"><div class="empty-state">Aucun client enregistré</div></div>
+  </div>
+
+  <nav class="navbar">
+    <button class="nav-btn active" id="nav-accueil" onclick="goPage('accueil')"><span class="nav-icon">🏠</span><span>Accueil</span></button>
+    <button class="nav-btn" id="nav-commandes" onclick="goPage('commandes')"><span class="nav-icon">🔔</span><span>Commandes<span id="cmd-badge" style="display:none;background:#ef4444;color:#fff;border-radius:10px;font-size:9px;padding:1px 5px;margin-left:3px;font-weight:700">0</span></span></button>
+    <button class="nav-btn" id="nav-nouvelle" onclick="goPage('nouvelle')"><span class="nav-icon">📦</span><span>Livraison</span></button>
+    <button class="nav-btn" id="nav-journal" onclick="goPage('journal')"><span class="nav-icon">📋</span><span>Journal</span></button>
+    <button class="nav-btn" id="nav-moto" onclick="goPage('moto')"><span class="nav-icon">🛵</span><span>Moto</span></button>
+    <button class="nav-btn" id="nav-livreurs" onclick="goPage('livreurs')"><span class="nav-icon">👷</span><span>Livreurs</span></button>
+    <button class="nav-btn" id="nav-clients" onclick="goPage('clients')"><span class="nav-icon">👥</span><span>Clients</span></button>
+    <button class="nav-btn" id="nav-bilan" onclick="goPage('bilan')"><span class="nav-icon">📊</span><span>Bilan</span></button>
+  </nav>
+</div>
+
+<!-- PAGE LIVREUR (accès livreur) -->
+<div id="livreur-screen" style="display:none;min-height:100vh;background:linear-gradient(135deg,#0a1628,#0d3b6e);padding-bottom:80px">
+  <div style="background:rgba(0,0,0,0.3);padding:14px 18px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,0.1)">
+    <span style="font-size:22px">🛵</span>
+    <div style="flex:1">
+      <div style="font-size:15px;font-weight:700">GMS — Mes livraisons</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.45)" id="livreur-screen-nom">—</div>
+    </div>
+    <button onclick="quitterEspacelivreur()" style="background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:6px 12px;color:#fff;cursor:pointer;font-size:13px">Quitter</button>
+  </div>
+  <div style="padding:14px">
+    <div id="livreur-flash" style="display:none;margin-bottom:12px;padding:11px;border-radius:12px;font-size:13px;text-align:center"></div>
+    <div id="livreur-livraisons-list"><div style="text-align:center;color:rgba(255,255,255,0.3);padding:40px 20px">Aucune livraison assignée</div></div>
+  </div>
+</div>
+
+<!-- MODAL LIVREUR LOGIN -->
+<div class="modal-overlay" id="modal-livreur-login">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">🛵 Espace Livreur</div>
+      <button class="modal-close" onclick="fermerModalLivreurLogin()">✕</button>
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:16px">Sélectionnez votre nom pour voir vos livraisons du jour</div>
+    <div id="livreur-login-list"></div>
+  </div>
+</div>
+
+<!-- MODAL FICHE CLIENT -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-client-nom">Fiche client</div>
+      <button class="modal-close" onclick="fermerModalClient()">✕</button>
+    </div>
+    <div id="modal-client-content"></div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title">⚠️ Supprimer ?</div>
+    <div class="confirm-text">Cette livraison sera définitivement supprimée.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="fermerConfirm()">Annuler</button>
+      <button class="btn-confirm-del" onclick="confirmerSuppression()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, orderBy, query, enableIndexedDbPersistence, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBAO9nzfuLvsPryUcGNtKjBBW_Wcf5DuCs",
+    authDomain: "livraison-niamey.firebaseapp.com",
+    projectId: "livraison-niamey",
+    storageBucket: "livraison-niamey.firebasestorage.app",
+    messagingSenderId: "1074003538740",
+    appId: "1:1074003538740:web:8f38d4fd197c3b95296b61"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ─── PERSISTANCE HORS LIGNE ───
+  try {
+    enableIndexedDbPersistence(db).catch(()=>{});
+  } catch(e) {}
+
+  const fmt     = n => Number(n||0).toLocaleString('fr-FR');
+  const nowDate = () => new Date().toLocaleDateString('fr-FR');
+  const nowTime = () => new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  const todayISO = () => new Date().toISOString().split('T')[0];
+
+  // QUARTIERS
+  let QUARTIERS = ["105 Logements","Aéroport","Banifandou 1","Banifandou 2","Banizoumbou 1","Banizoumbou 2","Banga Bana","Bassora","Bobiel","Boukoki 1","Boukoki 2","Boukoki 3","Boukoki 4","Cité Caisse","Cité Député","Cité Faycal","Cité Salou Djibo","Dan Gao","Dan Zama","Dar Es Salam","Fada Loubatou","Foulankoira","Francophonie","Gamkallé","Gaweye","Goudel","Goudourou","Hôpital de Référence","Kalley","Kalley Est","Karma","Karadjé","Kirkissoye","Kossey","Koubia","Lacroussou","Lamordé","Lazaret","Liberté","Maourey","Niamey 2000","Nordiré","Nouveau Marché","Pays Bas","Plateau","Pont Kennedy","Poudrière","Quartier Abidjan","Récasement","Riyad","Sabon Gari","Saga","Soneyzé","Soni","Sonuci","Talladjé","Tamesna","Tchangarey","Terminus","Wadata","Yantala","Zongo"];
+
+  function getQuartiersCustom() { try { return JSON.parse(localStorage.getItem('gms_quartiers')||'[]'); } catch { return []; } }
+  function getAllQuartiers() { return [...new Set([...QUARTIERS, ...getQuartiersCustom()])].sort(); }
+  function ajouterQuartierCustom(q) {
+    if (!q || QUARTIERS.includes(q)) return;
+    const custom = getQuartiersCustom();
+    if (!custom.includes(q)) { custom.push(q); localStorage.setItem('gms_quartiers', JSON.stringify(custom)); }
+  }
+
+  let livraisons = [];
+  let depenses   = [];
+  let commandes  = [];
+  let currentFilter = 'tout';
+  let deleteTargetId = null;
+  let editMode = false;
+
+  // ─── NUMÉRO DE SUIVI ───
+  function genererNumeroSuivi() {
+    const annee = new Date().getFullYear();
+    let counter = parseInt(localStorage.getItem('gms_suivi_counter')||'0') + 1;
+    localStorage.setItem('gms_suivi_counter', counter);
+    // Ajouter les 3 derniers chiffres du timestamp pour unicité
+    const ts = String(Date.now()).slice(-3);
+    return 'GMS-' + annee + '-' + String(counter).padStart(4,'0') + ts;
+  }
+
+  // ─── LIVREURS LOCAL STORAGE ───
+  function getLivreurs() { try { return JSON.parse(localStorage.getItem('gms_livreurs')||'[]'); } catch { return []; } }
+  function saveLivreurs(d) { localStorage.setItem('gms_livreurs', JSON.stringify(d)); }
+
+  // ─── LOCAL STORAGE ───
+  function getClientsMemoire() { try { return JSON.parse(localStorage.getItem('gms_clients')||'{}'); } catch { return {}; } }
+  function sauvegarderClient(nom, tel) {
+    if (!nom) return;
+    const c = getClientsMemoire();
+    c[nom.toLowerCase()] = { nom, tel: tel||'' };
+    localStorage.setItem('gms_clients', JSON.stringify(c));
+  }
+  function getRecurrents() { try { return JSON.parse(localStorage.getItem('gms_recurrents')||'[]'); } catch { return []; } }
+  function getCarburants() { try { return JSON.parse(localStorage.getItem('gms_carburants')||'[]'); } catch { return []; } }
+  function saveCarburants(d) { localStorage.setItem('gms_carburants', JSON.stringify(d)); }
+  function getEpargnes() { try { return JSON.parse(localStorage.getItem('gms_epargnes')||'[]'); } catch { return []; } }
+  function saveEpargnes(d) { localStorage.setItem('gms_epargnes', JSON.stringify(d)); }
+  function getObjectif()  { return parseInt(localStorage.getItem('gms_objectif')||'0'); }
+  function getEpargneJour() { return parseInt(localStorage.getItem('gms_epargne_jour')||'0'); }
+  function getEpargneObjectif() { return parseInt(localStorage.getItem('gms_epargne_objectif')||'0'); }
+  function getInvestissement() { return parseInt(localStorage.getItem('gms_investissement')||'0'); }
+
+  // ─── GESTION LIVREURS ───
+  window.ajouterLivreur = function() {
+    const nom = document.getElementById('livreur-nom-input').value.trim();
+    const tel = document.getElementById('livreur-tel-input').value.trim();
+    if (!nom) { showFlash('⚠️ Entrez un nom','error'); return; }
+    const livreurs = getLivreurs();
+    if (livreurs.find(l=>l.nom.toLowerCase()===nom.toLowerCase())) { showFlash('⚠️ Ce livreur existe déjà','error'); return; }
+    livreurs.push({id: Date.now().toString(), nom, tel});
+    saveLivreurs(livreurs);
+    document.getElementById('livreur-nom-input').value='';
+    document.getElementById('livreur-tel-input').value='';
+    showFlash('✅ Livreur ajouté !');
+    renderLivreurs();
+    remplirSelectLivreur();
+  }
+
+  window.supprimerLivreur = function(id) {
+    if (!confirm('Supprimer ce livreur ?')) return;
+    saveLivreurs(getLivreurs().filter(l=>l.id!==id));
+    renderLivreurs();
+    remplirSelectLivreur();
+  }
+
+  function remplirSelectLivreur() {
+    const sel = document.getElementById('f-livreur');
+    if (!sel) return;
+    const livreurs = getLivreurs();
+    sel.innerHTML = '<option value="">— Vous-même —</option>' +
+      livreurs.map(l=>`<option value="${l.nom}">${l.nom}</option>`).join('');
+  }
+
+  function renderLivreurs() {
+    const livreurs = getLivreurs();
+    const el = document.getElementById('livreurs-count');
+    if (el) el.textContent = livreurs.length;
+    const list = document.getElementById('livreurs-list');
+    if (!list) return;
+    list.innerHTML = !livreurs.length ? '<div class="empty-state">Aucun livreur</div>'
+      : livreurs.map(l=>`
+        <div class="livreur-card">
+          <div>
+            <div class="livreur-nom">🛵 ${l.nom}</div>
+            ${l.tel?`<div class="livreur-meta">📞 ${l.tel}</div>`:''}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            ${l.tel?`<a href="tel:${l.tel}" style="background:rgba(39,174,96,0.2);border:1px solid rgba(39,174,96,0.4);border-radius:8px;padding:6px 10px;color:#2ecc71;font-size:12px;text-decoration:none">📞</a>`:''}
+            <button class="btn-danger" onclick="supprimerLivreur('${l.id}')">🗑</button>
+          </div>
+        </div>`).join('');
+
+    // Stats par livreur aujourd'hui
+    const todayFR = nowDate();
+    const statsEl = document.getElementById('livreurs-stats');
+    if (statsEl) {
+      const stats = {};
+      livreurs.forEach(l=>stats[l.nom]={count:0,total:0});
+      stats['Vous-même'] = {count:0,total:0};
+      livraisons.filter(l=>l.date===todayFR&&l.statut!=='Annulé').forEach(l=>{
+        const nom = l.livreur || 'Vous-même';
+        if (!stats[nom]) stats[nom]={count:0,total:0};
+        stats[nom].count++; stats[nom].total+=l.montant;
+      });
+      const entries = Object.entries(stats).filter(([,v])=>v.count>0);
+      statsEl.innerHTML = !entries.length ? '<div class="empty-state">Aucune livraison aujourd&#39;hui</div>'
+        : entries.map(([nom,v])=>`
+          <div class="resume-row">
+            <span class="resume-key">🛵 ${nom}</span>
+            <span class="resume-val">${v.count} liv. — ${fmt(v.total)} FCFA</span>
+          </div>`).join('');
+    }
+  }
+
+  // ─── ESPACE LIVREUR ───
+  window.ouvrirEspaceLivreur = function() {
+    const livreurs = getLivreurs();
+    if (!livreurs.length) { showFlash('⚠️ Aucun livreur enregistré','error'); return; }
+    const list = document.getElementById('livreur-login-list');
+    list.innerHTML = livreurs.map(l=>`
+      <div class="livreur-card" onclick="connecterLivreur('${l.nom}')" style="cursor:pointer">
+        <div><div class="livreur-nom">🛵 ${l.nom}</div></div>
+        <span style="color:#a29bfe;font-size:20px">→</span>
+      </div>`).join('');
+    document.getElementById('modal-livreur-login').classList.add('show');
+  }
+
+  window.fermerModalLivreurLogin = function() {
+    document.getElementById('modal-livreur-login').classList.remove('show');
+  }
+
+  window.connecterLivreur = function(nom) {
+    fermerModalLivreurLogin();
+    document.getElementById('livreur-screen-nom').textContent = 'Bonjour ' + nom;
+    renderLivreurScreen(nom);
+    document.getElementById('app').style.display='none';
+    document.getElementById('livreur-screen').style.display='block';
+  }
+
+  window.quitterEspacelivreur = function() {
+    document.getElementById('livreur-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+  }
+
+  function renderLivreurScreen(nom) {
+    const todayFR = nowDate();
+    const mesLivraisons = livraisons.filter(l=>(l.livreur||'Vous-même')===nom && l.date===todayFR);
+    const list = document.getElementById('livreur-livraisons-list');
+    const fl = document.getElementById('livreur-flash');
+    if (!mesLivraisons.length) {
+      list.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.3);padding:40px 20px;font-size:13px">Aucune livraison assign&#233;e aujourd&#39;hui</div>';
+      return;
+    }
+    list.innerHTML = mesLivraisons.map(l=>`
+      <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-weight:700;font-size:15px">${l.client}</span>
+          <span style="font-size:11px;font-weight:700;color:#74b9ff">${l.numeroSuivi||''}</span>
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:4px">📍 ${l.depart} → ${l.arrivee}</div>
+        ${l.description?`<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px">📦 ${l.description}</div>`:''}
+        ${l.telDest?`<div style="font-size:12px;margin-bottom:8px"><a href="tel:${l.telDest}" style="color:#2ecc71">📞 Destinataire : ${l.telDest}</a></div>`:''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          ${l.statut==='En cours'?`<button onclick="livreurMarquerLivre('${l.id}','${nom}')" style="background:rgba(39,174,96,0.25);border:1px solid rgba(39,174,96,0.5);border-radius:8px;padding:8px 14px;color:#2ecc71;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✅ Marquer Livré</button>`:''}
+          ${l.statut==='En cours'?`<button onclick="livreurEnRoute('${l.id}','${nom}')" style="background:rgba(108,99,255,0.25);border:1px solid rgba(108,99,255,0.5);border-radius:8px;padding:8px 14px;color:#a29bfe;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">🛵 En route</button>`:''}
+          <span style="display:inline-flex;align-items:center;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;${l.statut==='Livré'?'background:rgba(39,174,96,0.2);color:#2ecc71':l.statut==='En cours'?'background:rgba(243,156,18,0.2);color:#f39c12':'background:rgba(108,99,255,0.2);color:#a29bfe'}">${l.statut==='Livré'?'✅ Livré':l.statut==='En cours'?'⏳ En cours':'🛵 En route'}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  window.livreurMarquerLivre = async function(id, nomLivreur) {
+    try {
+      await updateDoc(doc(db,'livraisons',id),{statut:'Livré'});
+      await loadData();
+      renderLivreurScreen(nomLivreur);
+      const fl=document.getElementById('livreur-flash');
+      fl.textContent='✅ Livraison marquée comme livrée !'; fl.style.display='block'; fl.style.background='rgba(39,174,96,0.2)'; fl.style.border='1px solid #27ae60';
+      setTimeout(()=>fl.style.display='none',3000);
+    } catch(e) {}
+  }
+
+  window.livreurEnRoute = async function(id, nomLivreur) {
+    const l = livraisons.find(l=>l.id===id);
+    if (!l) return;
+    try {
+      await updateDoc(doc(db,'livraisons',id),{statut:'En route'});
+      await loadData();
+      renderLivreurScreen(nomLivreur);
+      // WA automatique au destinataire
+      if (l.telDest) {
+        const msg = `🛵 GMS Livraison Niamey
+
+Bonjour, votre colis envoyé par ${l.client} est en route vers ${l.arrivee}.
+
+Notre livreur arrive bientôt. Veuillez vous tenir disponible.
+
+GMS Livraison Niamey 📞`;
+        window.open(`https://wa.me/${formatTel(l.telDest)}?text=${encodeURIComponent(msg)}`,'_blank');
+      }
+    } catch(e) {}
+  }
+
+  // ─── VIDANGE ───
+  window.sauvegarderVidange = function() {
+    const date = document.getElementById('vidange-date').value;
+    const sem  = parseInt(document.getElementById('vidange-semaines').value);
+    if (!date) { showFlash('⚠️ Sélectionnez une date','error'); return; }
+    localStorage.setItem('gms_vidange', JSON.stringify({date, semaines: sem}));
+    showFlash('✅ Rappel vidange enregistré !');
+    renderAlerteVidange();
+  }
+
+  function renderAlerteVidange() {
+    const data = JSON.parse(localStorage.getItem('gms_vidange')||'null');
+    const ids = ['alerte-vidange','alerte-vidange2'];
+    if (!data) { ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; }); return; }
+    const dernier = new Date(data.date);
+    const prochain = new Date(dernier);
+    prochain.setDate(prochain.getDate() + data.semaines*7);
+    const now = new Date();
+    const joursRestants = Math.ceil((prochain-now)/(1000*60*60*24));
+    const dateProchain = prochain.toLocaleDateString('fr-FR');
+
+    let html = '';
+    if (joursRestants <= 0) {
+      html = `<div class="alerte-card danger" style="margin-bottom:14px"><div class="alerte-title">🔧 VIDANGE EN RETARD !</div><div class="alerte-sub">La vidange était prévue le ${dateProchain}. Faites-la dès que possible !</div></div>`;
+    } else if (joursRestants <= 7) {
+      html = `<div class="alerte-card warning" style="margin-bottom:14px"><div class="alerte-title">⚠️ Vidange dans ${joursRestants} jours</div><div class="alerte-sub">Prévue le ${dateProchain}. Pensez à la planifier !</div></div>`;
+    } else {
+      html = `<div class="alerte-card ok" style="margin-bottom:14px"><div class="alerte-title">✅ Moto en bon état</div><div class="alerte-sub">Prochaine vidange le ${dateProchain} (dans ${joursRestants} jours)</div></div>`;
+    }
+    ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=html; });
+
+    // Pré-remplir le formulaire
+    document.getElementById('vidange-date').value = data.date;
+    document.getElementById('vidange-semaines').value = data.semaines;
+  }
+
+  // ─── CARBURANT ───
+  window.ajouterCarburant = function() {
+    const litres = parseFloat(document.getElementById('carb-litres').value);
+    const prix   = parseInt(document.getElementById('carb-prix').value);
+    const note   = document.getElementById('carb-note').value.trim();
+    if (!prix||isNaN(prix)) { showFlash('⚠️ Entrez un prix valide','error'); return; }
+    const carbs = getCarburants();
+    carbs.unshift({id:Date.now().toString(), date:nowDate(), dateISO:todayISO(), litres:litres||0, prix, note});
+    saveCarburants(carbs);
+    document.getElementById('carb-litres').value='';
+    document.getElementById('carb-prix').value='';
+    document.getElementById('carb-note').value='';
+    showFlash('✅ Plein enregistré !');
+    renderCarburant();
+  }
+
+  function renderCarburant() {
+    const carbs = getCarburants();
+    const moisStr = todayISO().substring(0,7);
+    const totalPrix   = carbs.reduce((s,c)=>s+c.prix,0);
+    const totalLitres = carbs.reduce((s,c)=>s+(c.litres||0),0);
+    const moy = totalLitres > 0 ? Math.round(totalPrix/totalLitres) : 0;
+    const moisPrix = carbs.filter(c=>c.dateISO&&c.dateISO.startsWith(moisStr)).reduce((s,c)=>s+c.prix,0);
+    document.getElementById('carb-mois').textContent        = fmt(moisPrix)+' FCFA';
+    document.getElementById('carb-total').textContent       = fmt(totalPrix)+' FCFA';
+    document.getElementById('carb-litres-total').textContent = totalLitres.toFixed(1)+' L';
+    document.getElementById('carb-moy').textContent         = fmt(moy)+' FCFA';
+    document.getElementById('carb-nb').textContent          = carbs.length;
+    const list = document.getElementById('carb-list');
+    list.innerHTML = !carbs.length ? '<div class="empty-state">Aucun plein</div>'
+      : carbs.slice(0,10).map(c=>`
+        <div class="item">
+          <div class="item-top"><span class="item-name">⛽ ${c.litres||'?'} L</span><span class="montant-neg">-${fmt(c.prix)} FCFA</span></div>
+          ${c.note?`<div class="item-sub">💬 ${c.note}</div>`:''}
+          <div class="item-bottom"><span class="item-time">${c.date}</span></div>
+        </div>`).join('');
+  }
+
+  // ─── ÉPARGNE ───
+  window.sauvegarderEpargne = function() {
+    const val = parseInt(document.getElementById('epargne-input').value);
+    if (!val||isNaN(val)) { showFlash('⚠️ Entrez un montant','error'); return; }
+    localStorage.setItem('gms_epargne_jour', val);
+    document.getElementById('epargne-input').value='';
+    showFlash('✅ Épargne journalière : '+fmt(val)+' FCFA');
+    renderAll();
+  }
+  window.sauvegarderEpargneObjectif = function() {
+    const val = parseInt(document.getElementById('epargne-objectif-input').value);
+    if (!val||isNaN(val)) { showFlash('⚠️ Entrez un montant','error'); return; }
+    localStorage.setItem('gms_epargne_objectif', val);
+    document.getElementById('epargne-objectif-input').value='';
+    showFlash('✅ Objectif épargne : '+fmt(val)+' FCFA');
+    renderAll();
+  }
+  window.ajouterEpargne = function() {
+    const montant = getEpargneJour();
+    if (!montant) { showFlash('⚠️ Définissez d\'abord un montant d\'épargne journalier','error'); return; }
+    const epargnes = getEpargnes();
+    epargnes.unshift({id:Date.now().toString(), date:nowDate(), dateISO:todayISO(), montant});
+    saveEpargnes(epargnes);
+    showFlash('✅ Épargne de '+fmt(montant)+' FCFA ajoutée !');
+    renderAll();
+  }
+
+  // ─── INVESTISSEMENT ───
+  window.sauvegarderInvestissement = function() {
+    const val = parseInt(document.getElementById('invest-input').value);
+    if (!val||isNaN(val)) { showFlash('⚠️ Entrez un montant','error'); return; }
+    localStorage.setItem('gms_investissement', val);
+    document.getElementById('invest-input').value='';
+    showFlash('✅ Investissement moto : '+fmt(val)+' FCFA');
+    renderAll();
+  }
+
+  // ─── OBJECTIF ───
+  window.sauvegarderObjectif = function() {
+    const val = parseInt(document.getElementById('obj-input').value);
+    if (!val||isNaN(val)) { showFlash('⚠️ Entrez un montant valide','error'); return; }
+    localStorage.setItem('gms_objectif', val);
+    document.getElementById('obj-input').value='';
+    showFlash('✅ Objectif : '+fmt(val)+' FCFA');
+    renderAll();
+  }
+
+  function renderObjectif(recMois) {
+    const obj = getObjectif();
+    const pct = obj ? Math.min(Math.round(recMois/obj*100),100) : 0;
+    const atteint = recMois >= obj && obj > 0;
+    ['','2'].forEach(s=>{
+      const v=document.getElementById('obj-vals'+s), b=document.getElementById('obj-bar'+s), p=document.getElementById('obj-pct'+s);
+      if(!v) return;
+      v.textContent = fmt(recMois)+' / '+fmt(obj)+' FCFA';
+      b.style.width = pct+'%';
+      b.className   = 'progress-fill'+(atteint?' atteint':'');
+      p.textContent = obj ? pct+'% '+(atteint?'🎉 Objectif atteint !':'') : 'Aucun objectif défini';
+    });
+  }
+
+  // ─── LIVRAISONS RÉCURRENTES ───
+  window.sauvegarderRecurrent = function() {
+    const client = document.getElementById('f-client').value.trim();
+    const depart = document.getElementById('f-depart').value.trim();
+    const arrivee= document.getElementById('f-arrivee').value.trim();
+    const montant= parseInt(document.getElementById('f-montant').value);
+    const telClient = document.getElementById('f-tel-client').value.trim();
+    const paiement  = document.getElementById('f-paiement').value;
+    if (!client||!depart||!arrivee||!montant) { showFlash('⚠️ Remplissez client, départ, arrivée et montant','error'); return; }
+    const recs = getRecurrents();
+    const existe = recs.find(r=>r.client===client&&r.depart===depart&&r.arrivee===arrivee);
+    if (existe) { showFlash('⚠️ Cette livraison est déjà enregistrée comme fréquente','error'); return; }
+    recs.push({id:Date.now().toString(), client, depart, arrivee, montant, telClient, paiement});
+    localStorage.setItem('gms_recurrents', JSON.stringify(recs));
+    showFlash('✅ Livraison fréquente enregistrée !');
+    renderRecurrents();
+  }
+
+  function renderRecurrents() {
+    const recs = getRecurrents();
+    const list = document.getElementById('recurrents-list');
+    if (!recs.length) { list.innerHTML='<div class="empty-state" style="padding:10px">Aucune livraison fréquente</div>'; return; }
+    list.innerHTML = recs.map(r=>`
+      <div class="recurrent-item" onclick="chargerRecurrent('${r.id}')">
+        <div class="recurrent-info">
+          <div class="recurrent-name">${r.client}</div>
+          <div class="recurrent-detail">📍 ${r.depart} → ${r.arrivee}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="recurrent-prix">${fmt(r.montant)} F</span>
+          <button class="btn-danger" style="padding:4px 8px" onmousedown="supprimerRecurrent(event,'${r.id}')">🗑</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.chargerRecurrent = function(id) {
+    const r = getRecurrents().find(r=>r.id===id);
+    if (!r) return;
+    document.getElementById('f-client').value     = r.client||'';
+    document.getElementById('f-depart').value     = r.depart||'';
+    document.getElementById('f-tel-client').value = r.telClient||'';
+    const fp = document.getElementById('f-paiement'); if(fp) fp.value = r.paiement||'Espèces';
+    // Pré-remplir le premier colis
+    initColisForm();
+    setTimeout(() => {
+      const arriveeEl = document.getElementById('colis-arrivee-0');
+      if(arriveeEl) arriveeEl.value = r.arrivee||'';
+    }, 50);
+    showFlash('✅ Livraison fréquente chargée !');
+    window.scrollTo(0,400);
+  }
+
+  window.supprimerRecurrent = function(e, id) {
+    e.stopPropagation();
+    const recs = getRecurrents().filter(r=>r.id!==id);
+    localStorage.setItem('gms_recurrents', JSON.stringify(recs));
+    renderRecurrents();
+  }
+
+  // ─── TABS ───
+  window.setTab = function(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+    if (tabId==='tab-carburant') renderCarburant();
+  }
+
+  // ─── CONTACTS ───
+  window.chercherContact = async function(telInputId, nomInputId) {
+    if ('contacts' in navigator && 'ContactsManager' in window) {
+      try {
+        const contacts = await navigator.contacts.select(['name','tel'],{multiple:false});
+        if (contacts.length > 0) {
+          const c = contacts[0];
+          if (c.tel?.length) document.getElementById(telInputId).value = c.tel[0].replace(/\s+/g,'');
+          if (nomInputId && c.name?.length) { document.getElementById(nomInputId).value = c.name[0]; acClient(); }
+        }
+      } catch(e) { showFlash('⚠️ Accès contacts non disponible','error'); }
+    } else { showFlash('⚠️ Accès contacts non supporté sur ce navigateur','error'); }
+  }
+
+  // ─── MULTI-COLIS ───
+  let colisCounter = 0;
+
+  function colisHTML(idx) {
+    return `<div class="colis-item" id="colis-${idx}">
+      <div class="colis-header">
+        <span>📦 Colis ${idx+1}</span>
+        ${idx > 0 ? `<button class="btn-remove-colis" onclick="supprimerColis(${idx})">✕ Retirer</button>` : ''}
+      </div>
+      <label>Quartier arrivée *</label>
+      <div class="ac-wrap" style="margin-bottom:12px">
+        <input id="colis-arrivee-${idx}" type="text" placeholder="Arrivée" autocomplete="off"
+          oninput="acQuartier('colis-arrivee-${idx}','ac-colis-arrivee-${idx}')"
+          onfocus="acQuartier('colis-arrivee-${idx}','ac-colis-arrivee-${idx}')">
+        <div class="ac-list" id="ac-colis-arrivee-${idx}"></div>
+      </div>
+      <label>Numéro destinataire</label>
+      <div class="tel-row" style="margin-bottom:12px">
+        <input id="colis-tel-${idx}" type="tel" placeholder="Ex: 90000000" inputmode="numeric" style="margin-bottom:0">
+        <button class="btn-call" onclick="appeler('colis-tel-${idx}')">📞</button>
+      </div>
+      <label>Description du colis</label>
+      <input id="colis-desc-${idx}" type="text" placeholder="Ex: Documents, téléphone...">
+      <label>Montant du colis (FCFA) — pour info seulement</label>
+      <input id="colis-montant-${idx}" type="number" placeholder="Ex: 10000" inputmode="numeric" style="border-color:rgba(255,255,255,0.1)">
+      <label>💰 Frais de livraison (FCFA) *</label>
+      <input id="colis-frais-${idx}" type="number" placeholder="Ex: 1500" inputmode="numeric" style="border-color:rgba(34,197,94,0.4);background:rgba(34,197,94,0.05)">
+    </div>`;
+  }
+
+  window.ajouterColis = function() {
+    const container = document.getElementById('colis-container');
+    const div = document.createElement('div');
+    div.innerHTML = colisHTML(colisCounter);
+    container.appendChild(div.firstElementChild);
+    colisCounter++;
+    // Ajouter listener sur le montant pour mise à jour total
+    const montantInput = document.getElementById('colis-montant-'+(colisCounter-1));
+    if (montantInput) montantInput.addEventListener('input', mettreAJourTotalColis);
+  }
+
+  window.mettreAJourTotalColis = function() {
+    const colisData = getColisData();
+    const totalFrais = colisData.reduce((s,c)=>s+(isNaN(c.frais)?0:c.frais),0);
+    const bar = document.getElementById('colis-total-bar');
+    const val = document.getElementById('colis-total-val');
+    if (bar && val) {
+      bar.style.display = colisData.length > 1 ? 'flex' : 'none';
+      val.textContent = fmt(totalFrais) + ' FCFA';
+    }
+  }
+
+  window.supprimerColis = function(idx) {
+    const el = document.getElementById('colis-'+idx);
+    if (el) el.remove();
+    // Renuméroter les headers
+    const items = document.querySelectorAll('.colis-item');
+    items.forEach((item, i) => {
+      const header = item.querySelector('.colis-header span');
+      if (header) header.textContent = '📦 Colis '+(i+1);
+    });
+  }
+
+  function getColisData() {
+    const items = document.querySelectorAll('.colis-item');
+    const result = [];
+    items.forEach(item => {
+      const id = item.id.replace('colis-','');
+      const arrivee = document.getElementById('colis-arrivee-'+id)?.value.trim() || '';
+      const tel = document.getElementById('colis-tel-'+id)?.value.trim() || '';
+      const desc = document.getElementById('colis-desc-'+id)?.value.trim() || '';
+      const montant = parseInt(document.getElementById('colis-montant-'+id)?.value || '0') || 0;
+      const frais = parseInt(document.getElementById('colis-frais-'+id)?.value || '0') || 0;
+      result.push({ arrivee, tel, desc, montant, frais });
+    });
+    return result;
+  }
+
+  function initColisForm() {
+    colisCounter = 0;
+    document.getElementById('colis-container').innerHTML = '';
+    ajouterColis(); // Toujours au moins 1 colis
+  }
+
+  // ─── AUTOCOMPLETE ───
+  window.acClient = function() {
+    const input = document.getElementById('f-client');
+    const list  = document.getElementById('ac-client');
+    const val   = input.value.toLowerCase().trim();
+    // Fusionner localStorage + Firebase
+    const stored = Object.values(getClientsMemoire());
+    const fbMap = {};
+    livraisons.forEach(l => {
+      if (l.client) {
+        const k = l.client.toLowerCase();
+        if (!fbMap[k]) fbMap[k] = { nom: l.client, tel: l.telClient||'' };
+        else if (l.telClient && !fbMap[k].tel) fbMap[k].tel = l.telClient;
+      }
+    });
+    stored.forEach(c => { fbMap[c.nom.toLowerCase()] = c; });
+    const allClients = Object.values(fbMap).sort((a,b)=>a.nom.localeCompare(b.nom));
+    const filtered = val ? allClients.filter(c=>c.nom.toLowerCase().includes(val)) : allClients;
+    if (!filtered.length) { list.classList.remove('show'); return; }
+    list.innerHTML = filtered.slice(0,8).map(c=>{
+      const nomSafe = c.nom.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const telSafe = (c.tel||'').replace(/'/g,"\\'");
+      return `<div class="ac-item" onmousedown="choisirClient('${nomSafe}','${telSafe}')">
+        <span>${c.nom}</span>${c.tel?`<span class="ac-item-tel">📞 ${c.tel}</span>`:''}
+      </div>`;
+    }).join('');
+    list.classList.add('show');
+  }
+  window.choisirClient = function(nom, tel) {
+    document.getElementById('f-client').value = nom;
+    if (tel) document.getElementById('f-tel-client').value = tel;
+    document.getElementById('ac-client').classList.remove('show');
+  }
+  // Note: choisirClientB64 est défini dans acClient ci-dessus
+  window.acQuartier = function(inputId, listId) {
+    const input = document.getElementById(inputId);
+    const list  = document.getElementById(listId);
+    const val   = input.value.toLowerCase().trim();
+    const all   = getAllQuartiers();
+    const filtered = val ? all.filter(q=>q.toLowerCase().includes(val)) : all;
+    if (!filtered.length) { list.classList.remove('show'); return; }
+    list.innerHTML = filtered.slice(0,8).map(q=>`
+      <div class="ac-item" onmousedown="choisirQuartier('${inputId}','${listId}','${q.replace(/'/g,"\\'")}')"><span>${q}</span></div>`).join('');
+    // Si nouveau quartier non dans la liste
+    const exact = all.find(q=>q.toLowerCase()===val);
+    if (val && !exact) {
+      list.innerHTML += `<div class="ac-item" style="color:#f39c12" onmousedown="ajouterEtChoisir('${inputId}','${listId}')">➕ Ajouter "${input.value.trim()}"</div>`;
+    }
+    list.classList.add('show');
+  }
+  window.choisirQuartier = function(inputId, listId, val) {
+    document.getElementById(inputId).value = val;
+    document.getElementById(listId).classList.remove('show');
+  }
+  window.ajouterEtChoisir = function(inputId, listId) {
+    const val = document.getElementById(inputId).value.trim();
+    if (val) {
+      ajouterQuartierCustom(val);
+      document.getElementById(listId).classList.remove('show');
+      showFlash('✅ Quartier "'+val+'" ajouté à la liste !');
+    }
+  }
+
+  document.addEventListener('click', e => {
+    ['ac-client','ac-depart','ac-arrivee'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && !el.contains(e.target)) el.classList.remove('show');
+    });
+  });
+
+  window.appeler = function(inputId) {
+    const tel = document.getElementById(inputId).value.trim();
+    if (!tel) { showFlash('⚠️ Aucun numéro saisi','error'); return; }
+    window.location.href = 'tel:'+tel;
+  }
+
+  window.setStatut = function(statut) {
+    document.getElementById('f-statut').value = statut;
+    document.getElementById('s-encours').className = 'statut-btn encours'+(statut==='En cours'?' selected':'');
+    document.getElementById('s-livre').className   = 'statut-btn livre'+(statut==='Livré'?' selected':'');
+    document.getElementById('s-annule').className  = 'statut-btn annule'+(statut==='Annulé'?' selected':'');
+  }
+
+  // ─── WHATSAPP + SMS ───
+  function formatTel(tel) {
+    // Ajoute indicatif Niger 227 si numéro local
+    const t = (tel||'').replace(/\D/g,'');
+    if (t.startsWith('227')) return t;
+    return '227' + t;
+  }
+  window.envoyerWADestinaire = function(id) {
+    const l = livraisons.find(l=>l.id===id);
+    if (!l||!l.telDest) { showFlash('⚠️ Aucun numéro destinataire','error'); return; }
+    const msg = `🛵 GMS Livraison Niamey
+
+Bonjour, votre colis envoyé par ${l.client} est en cours de livraison vers ${l.arrivee}.
+
+Notre livreur arrive bientôt. Veuillez vous tenir disponible.
+
+GMS Livraison Niamey 📞`;
+    window.open(`https://wa.me/${formatTel(l.telDest)}?text=${encodeURIComponent(msg)}`,'_blank');
+  }
+  window.envoyerSMSDestinaire = function(id) {
+    const l = livraisons.find(l=>l.id===id);
+    if (!l||!l.telDest) { showFlash('⚠️ Aucun numéro destinataire','error'); return; }
+    const msg = `🛵 GMS Livraison Niamey
+
+Bonjour, votre colis envoyé par ${l.client} est en cours de livraison vers ${l.arrivee}.
+
+Notre livreur arrive bientôt. Veuillez vous tenir disponible.
+
+GMS Livraison Niamey 📞`;
+    window.location.href = `sms:${l.telDest}?body=${encodeURIComponent(msg)}`;
+  }
+  window.envoyerWAClient = function(id) {
+    const l = livraisons.find(l=>l.id===id);
+    if (!l||!l.telClient) { showFlash('⚠️ Aucun numéro client','error'); return; }
+    let msg;
+    if (l.groupeId) {
+      // Multi-colis : chercher tous les colis du même groupe
+      const groupe = livraisons.filter(x=>x.groupeId===l.groupeId).sort((a,b)=>(a.colisIndex||0)-(b.colisIndex||0));
+      const listeDestinations = groupe.map((c,i)=>`📦 Colis ${i+1} \u2192 ${c.arrivee}`).join('\n');
+      msg = `🛵 GMS Livraison Niamey
+
+Bonjour ${l.client}, vos colis ont bien été livrés !
+
+📍 Départ : ${l.depart}
+
+${listeDestinations}
+
+🕐 Heure : ${l.heure}
+📅 Date : ${l.date}
+
+Merci de votre confiance ! 🙏`;
+    } else {
+      msg = `🛵 GMS Livraison Niamey
+
+Bonjour ${l.client}, votre colis a bien été livré !
+
+📍 Trajet : ${l.depart} → ${l.arrivee}
+🕐 Heure de livraison : ${l.heure}
+📅 Date : ${l.date}
+
+Merci de votre confiance ! 🙏`;
+    }
+    window.open(`https://wa.me/${formatTel(l.telClient)}?text=${encodeURIComponent(msg)}`,'_blank');
+  }
+  window.envoyerSMSClient = function(id) {
+    const l = livraisons.find(l=>l.id===id);
+    if (!l||!l.telClient) { showFlash('⚠️ Aucun numéro client','error'); return; }
+    const msg = `🛵 GMS Livraison Niamey
+
+Bonjour ${l.client}, votre colis a bien été livré !
+
+📍 Trajet : ${l.depart} → ${l.arrivee}
+🕐 Heure de livraison : ${l.heure}
+📅 Date : ${l.date}
+
+Merci de votre confiance ! 🙏`;
+    window.location.href = `sms:${l.telClient}?body=${encodeURIComponent(msg)}`;
+  }
+
+  // ─── MARQUER LIVRÉ / EN ROUTE ───
+  window.marquerLivre = async function(id) {
+    showFlash('⏳ Mise à jour...','loading'); setSyncStatus('syncing');
+    try {
+      await updateDoc(doc(db,'livraisons',id),{statut:'Livré'});
+      await loadData();
+      showFlash('✅ Livraison marquée comme livrée !');
+    } catch(e) { showFlash('❌ Erreur.','error'); }
+  }
+
+  window.marquerEnRoute = async function(id) {
+    const l = livraisons.find(l=>l.id===id);
+    if (!l) return;
+    showFlash('⏳ Mise à jour...','loading');
+    try {
+      await updateDoc(doc(db,'livraisons',id),{statut:'En route'});
+      await loadData();
+      showFlash('🛵 En route !');
+      // WA automatique au destinataire
+      if (l.telDest) {
+        setTimeout(()=>{
+          const msg = `🛵 GMS Livraison Niamey
+
+Bonjour, votre colis envoyé par ${l.client} est en route vers ${l.arrivee}.
+
+Notre livreur arrive bientôt. Veuillez vous tenir disponible.
+
+GMS Livraison Niamey 📞`;
+          window.open(`https://wa.me/${formatTel(l.telDest)}?text=${encodeURIComponent(msg)}`,'_blank');
+        }, 1000);
+      }
+    } catch(e) { showFlash('❌ Erreur.','error'); }
+  }
+
+  // ─── NOTIFICATIONS + SERVICE WORKER ───
+  let commandesConnues = new Set();
+
+  async function enregistrerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+      const reg = await navigator.serviceWorker.register('sw.js', { scope: '/' });
+
+      // Demander permission notifications
+      if ('Notification' in window && Notification.permission !== 'granted') {
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          // Periodic Background Sync sur Android (si supporté)
+          if ('periodicSync' in reg) {
+            try {
+              await reg.periodicSync.register('gms-check-commandes', { minInterval: 30000 });
+            } catch(e) {}
+          }
+        }
+      }
+    } catch(e) { console.log('SW error:', e); }
+  }
+
+  // Écoute temps réel Firebase pour les commandes (quand app ouverte)
+  function ecouterCommandes() {
+    try {
+      onSnapshot(
+        query(collection(db,'commandes'), orderBy('timestamp','desc')),
+        (snapshot) => {
+          commandes = snapshot.docs.map(d=>({id:d.id,...d.data()}));
+          renderCommandes();
+          renderAll();
+        },
+        (err) => { console.log('Snapshot error:', err); }
+      );
+    } catch(e) { console.log('Snapshot setup error:', e); }
+  }
+
+  // ─── SYNC ───
+  // Détecter connexion/déconnexion automatiquement
+  window.addEventListener('online',  () => { setSyncStatus('syncing'); loadData(); });
+  window.addEventListener('offline', () => { setSyncStatus('offline'); });
+
+  function setSyncStatus(status) {
+    const dot=document.getElementById('sync-dot'), text=document.getElementById('sync-text');
+    dot.className  = 'sync-dot '+(status==='ok'?'':status);
+    text.textContent = status==='ok'?'Synchronisé':status==='syncing'?'Synchronisation...':'Hors ligne';
+  }
+  function showFlash(msg, type='ok') {
+    const el=document.getElementById('flash');
+    el.textContent=msg; el.className='flash show '+type;
+    if(type!=='loading') setTimeout(()=>el.className='flash',3000);
+  }
+
+  window.loadData = async function() {
+    if (navigator.onLine) setSyncStatus('syncing');
+    try {
+      const livSnap = await getDocs(query(collection(db,'livraisons'),orderBy('timestamp','desc')));
+      livraisons = livSnap.docs.map(d=>({id:d.id,...d.data()}));
+      const depSnap = await getDocs(query(collection(db,'depenses'),orderBy('timestamp','desc')));
+      depenses = depSnap.docs.map(d=>({id:d.id,...d.data()}));
+      setSyncStatus('ok');
+    } catch(e) {
+      // Pas de connexion — Firebase charge depuis le cache local automatiquement
+      setSyncStatus('offline');
+    }
+    renderAll();
+  }
+
+  window.goPage = function(name) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    const navEl = document.getElementById('nav-'+name); if(navEl) navEl.classList.add('active');
+    if(name==='nouvelle') renderRecurrents();
+    if(name!=='nouvelle' && !editMode) resetForm();
+    if(name!=='nouvelle') editMode=false;
+    if(name==='moto') { renderAlerteVidange(); renderCarburant(); }
+    if(name==='clients') { const cs=document.getElementById('client-search'); if(cs) cs.value=''; renderClientsPage(); }
+    if(name==='commandes') renderCommandes();
+    if(name==='livreurs') renderLivreurs();
+    renderAll(); window.scrollTo(0,0);
+  }
+
+  window.setFilter = function(filter) {
+    currentFilter=filter;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('f-'+filter).classList.add('active');
+    document.getElementById('filter-custom-dates').style.display=filter==='custom'?'flex':'none';
+    renderJournal();
+  }
+
+  function parseDateFR(str) {
+    if(!str) return null;
+    // Format ISO yyyy-mm-dd
+    if(/^\d{4}-\d{2}-\d{2}$/.test(str)) return new Date(str+'T00:00:00');
+    // Format FR dd/mm/yyyy
+    const p=str.split('/');
+    if(p.length===3&&p[2].length===4) {
+      const d=new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+      return isNaN(d.getTime())?null:d;
+    }
+    return null;
+  }
+
+  // Utiliser dateISO en priorité dans les filtres
+  function filtreDate(l) {
+    if(l.dateISO) return new Date(l.dateISO+'T00:00:00');
+    return parseDateFR(l.date);
+  }
+
+  function filtrerLivraisons() {
+    const now=new Date(); now.setHours(0,0,0,0);
+    if(currentFilter==='aujourd') return livraisons.filter(l=>{ const d=filtreDate(l); return d&&d>=now; });
+    if(currentFilter==='semaine') { const debut=new Date(now); debut.setDate(now.getDate()-now.getDay()); return livraisons.filter(l=>{ const d=filtreDate(l); return d&&d>=debut; }); }
+    if(currentFilter==='mois') { const debut=new Date(now.getFullYear(),now.getMonth(),1); return livraisons.filter(l=>{ const d=filtreDate(l); return d&&d>=debut; }); }
+    if(currentFilter==='custom') {
+      const deb=document.getElementById('date-debut').value, fin=document.getElementById('date-fin').value;
+      return livraisons.filter(l=>{ const d=filtreDate(l); if(!d) return false; if(deb&&d<new Date(deb)) return false; if(fin&&d>new Date(fin+'T23:59:59')) return false; return true; });
+    }
+    return livraisons;
+  }
+
+  function resetForm() {
+    // Champs qui existent toujours
+    ['f-client','f-tel-client','f-depart','f-note'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    const fp = document.getElementById('f-paiement'); if(fp) fp.value='Espèces';
+    const ei = document.getElementById('edit-id'); if(ei) ei.value='';
+    const ft = document.getElementById('form-title'); if(ft) ft.textContent='📦 Nouvelle livraison';
+    const fsb = document.getElementById('form-submit-btn'); if(fsb) fsb.textContent='✅ Valider la livraison';
+    const fcb = document.getElementById('form-cancel-btn'); if(fcb) fcb.style.display='none';
+    setStatut('En cours');
+    editMode=false;
+    // Réinitialiser le formulaire multi-colis
+    try { initColisForm(); } catch(e) {}
+  }
+
+  window.annulerModification = function() { resetForm(); goPage('journal'); }
+
+  window.ouvrirModification = function(id) {
+    const l=livraisons.find(l=>l.id===id); if(!l) return;
+    editMode=true;
+    document.getElementById('edit-id').value=id;
+    document.getElementById('f-client').value=l.client||'';
+    document.getElementById('f-tel-client').value=l.telClient||'';
+    document.getElementById('f-depart').value=l.depart||'';
+    const fp=document.getElementById('f-paiement'); if(fp) fp.value=l.paiement||'Espèces';
+    document.getElementById('f-note').value=l.note||'';
+    setStatut(l.statut||'En cours');
+    document.getElementById('form-title').textContent='✏️ Modifier la livraison';
+    document.getElementById('form-submit-btn').textContent='✅ Enregistrer les modifications';
+    document.getElementById('form-cancel-btn').style.display='block';
+    // Pré-remplir le colis dans le formulaire multi-colis
+    initColisForm();
+    setTimeout(() => {
+      const arriveeEl = document.getElementById('colis-arrivee-0');
+      const telEl     = document.getElementById('colis-tel-0');
+      const descEl    = document.getElementById('colis-desc-0');
+      const fraisEl   = document.getElementById('colis-frais-0');
+      const montantEl = document.getElementById('colis-montant-0');
+      if(arriveeEl) arriveeEl.value = l.arrivee||'';
+      if(telEl)     telEl.value     = l.telDest||'';
+      if(descEl)    descEl.value    = l.description||'';
+      if(fraisEl)   fraisEl.value   = l.montant||'';
+      if(montantEl) montantEl.value = l.montantColis||'';
+    }, 50);
+    // Ne pas appeler goPage qui appelle resetForm
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('page-nouvelle').classList.add('active');
+    document.getElementById('nav-nouvelle').classList.add('active');
+    renderRecurrents();
+    window.scrollTo(0,0);
+  }
+
+  window.soumettreFormulaire = async function() {
+    const client=document.getElementById('f-client').value.trim();
+    const telClient=document.getElementById('f-tel-client').value.trim();
+    const depart=document.getElementById('f-depart').value.trim();
+    const paiement=document.getElementById('f-paiement').value;
+    const statut=document.getElementById('f-statut').value;
+    const note=document.getElementById('f-note').value.trim();
+    const editId=document.getElementById('edit-id').value;
+    const colisData = getColisData();
+
+    if(!client||!depart) { showFlash('⚠️ Remplissez client et départ','error'); return; }
+    const colisSansArrivee = colisData.find(c=>!c.arrivee);
+    if(colisSansArrivee) { showFlash('⚠️ Chaque colis doit avoir un quartier arrivée','error'); return; }
+    const colisSansFrais = colisData.find(c=>!c.frais||isNaN(c.frais));
+    if(colisSansFrais) { showFlash('⚠️ Chaque colis doit avoir des frais de livraison','error'); return; }
+
+    showFlash('⏳ Enregistrement...','loading'); setSyncStatus('syncing');
+    sauvegarderClient(client, telClient);
+    ajouterQuartierCustom(depart);
+    colisData.forEach(c=>ajouterQuartierCustom(c.arrivee));
+
+    const dateISO=todayISO();
+    const groupeId = editId || Date.now().toString();
+
+    try {
+      if(editId) {
+        // Modification : un seul colis (mode simple)
+        const c = colisData[0];
+        await updateDoc(doc(db,'livraisons',editId),{
+          client,telClient,depart,
+          arrivee:c.arrivee,
+          telDest:c.tel,
+          description:c.desc,
+          montant:c.frais,        // frais de livraison
+          montantColis:c.montant, // montant du colis
+          paiement,statut,note
+        });
+        showFlash('✅ Livraison modifiée !');
+      } else {
+        // Enregistrer chaque colis séparément avec groupeId commun
+        const livreur = document.getElementById('f-livreur').value || '';
+        const promises = colisData.map((c, i) =>
+          addDoc(collection(db,'livraisons'),{
+            client, telClient, depart,
+            arrivee: c.arrivee,
+            telDest: c.tel,
+            description: c.desc,
+            montantColis: c.montant,
+            montant: c.frais,
+            paiement, statut, note,
+            livreur: livreur,
+            numeroSuivi: genererNumeroSuivi(),
+            date: nowDate(), heure: nowTime(), dateISO,
+            timestamp: Date.now()+i,
+            groupeId: colisData.length > 1 ? groupeId : null,
+            colisIndex: colisData.length > 1 ? i+1 : null,
+            colisTotal: colisData.length > 1 ? colisData.length : null
+          })
+        );
+        await Promise.all(promises);
+        showFlash('✅ '+colisData.length+' colis enregistré'+(colisData.length>1?'s':'')+'!');
+      }
+      resetForm(); await loadData();
+      setTimeout(()=>goPage('journal'),1200);
+    } catch(e) { setSyncStatus('offline'); showFlash('📴 Enregistré localement — synchronisation dès retour connexion','ok'); await loadData(); }
+  }
+
+  window.demanderSuppression = function(id) { deleteTargetId=id; document.getElementById('confirm-overlay').classList.add('show'); }
+  window.fermerConfirm = function() { deleteTargetId=null; document.getElementById('confirm-overlay').classList.remove('show'); }
+  window.confirmerSuppression = async function() {
+    if(!deleteTargetId) return;
+    const idToDelete = deleteTargetId; // Sauvegarder AVANT fermerConfirm
+    fermerConfirm(); showFlash('⏳ Suppression...','loading');
+    try {
+      livraisons = livraisons.filter(l=>l.id!==idToDelete);
+      renderAll();
+      await deleteDoc(doc(db,'livraisons',idToDelete));
+      await loadData();
+      showFlash('✅ Livraison supprimée !');
+    }
+    catch(e) { showFlash('❌ Erreur.','error'); }
+  }
+
+  window.ajouterDepense = async function() {
+    const categorie=document.getElementById('d-categorie').value;
+    const montant=parseInt(document.getElementById('d-montant').value);
+    const note=document.getElementById('d-note').value.trim();
+    if(!montant||isNaN(montant)) { showFlash('⚠️ Entrez un montant valide','error'); return; }
+    showFlash('⏳ Enregistrement...','loading'); setSyncStatus('syncing');
+    try {
+      await addDoc(collection(db,'depenses'),{categorie,montant,note,date:nowDate(),heure:nowTime(),dateISO:todayISO(),timestamp:Date.now()});
+      document.getElementById('d-montant').value=''; document.getElementById('d-note').value='';
+      await loadData(); showFlash('✅ Dépense enregistrée !');
+    } catch(e) { setSyncStatus('offline'); showFlash('❌ Erreur.','error'); }
+  }
+
+  window.supprimerDepense = async function(id) {
+    if(!confirm('Supprimer cette dépense ?')) return;
+    try {
+      depenses = depenses.filter(d=>d.id!==id);
+      renderAll();
+      await deleteDoc(doc(db,'depenses',id));
+      await loadData();
+      showFlash('✅ Dépense supprimée !');
+    } catch(e) { showFlash('❌ Erreur lors de la suppression.','error'); await loadData(); }
+  }
+
+  function statutBadge(s) {
+    if(s==='Livré')   return '<span class="badge badge-green">✅ Livré</span>';
+    if(s==='Annulé')  return '<span class="badge badge-red">❌ Annulé</span>';
+    if(s==='En route') return '<span class="badge badge-enroute">🛵 En route</span>';
+    return '<span class="badge badge-orange">⏳ En cours</span>';
+  }
+
+  // Alertes livraisons En cours > 2h
+  function verifierAlertes2h() {
+    const now = Date.now();
+    const enRetard = livraisons.filter(l =>
+      (l.statut==='En cours'||l.statut==='En route') && l.timestamp && (now - l.timestamp) > 2*60*60*1000
+    );
+    // Chercher ou créer la zone d'alerte 2h
+    let alertZone = document.getElementById('alerte-2h');
+    if (!alertZone) {
+      alertZone = document.createElement('div');
+      alertZone.id = 'alerte-2h';
+      const accueil = document.getElementById('page-accueil');
+      if (accueil) accueil.insertBefore(alertZone, accueil.firstChild);
+    }
+    if (enRetard.length > 0) {
+      alertZone.innerHTML = `<div class="alerte-card warning" style="margin-bottom:14px">
+        <div class="alerte-title">⏰ ${enRetard.length} livraison(s) en cours depuis plus de 2h !</div>
+        <div class="alerte-sub">${enRetard.map(l=>l.client+' → '+l.arrivee).join(' · ')}</div>
+      </div>`;
+    } else {
+      alertZone.innerHTML = '';
+    }
+  }
+
+  // ─── PAGE CLIENTS ───
+  function renderClientsPage(filtre='') {
+    const stored = Object.values(getClientsMemoire());
+    const fbClients = {};
+    livraisons.forEach(l => {
+      if (l.client) {
+        const key = l.client.toLowerCase();
+        if (!fbClients[key]) fbClients[key] = { nom: l.client, tel: l.telClient||'' };
+        else if (l.telClient && !fbClients[key].tel) fbClients[key].tel = l.telClient;
+      }
+    });
+    const merged = { ...fbClients };
+    stored.forEach(c => { merged[c.nom.toLowerCase()] = c; });
+    let clients = Object.values(merged).sort((a,b)=>a.nom.localeCompare(b.nom));
+    if (filtre) clients = clients.filter(c=>c.nom.toLowerCase().includes(filtre.toLowerCase()));
+    const list = document.getElementById('clients-list');
+    if (!clients.length) { list.innerHTML='<div class="empty-state">Aucun client trouvé</div>'; return; }
+    list.innerHTML = clients.map(c => {
+      const livCli = livraisons.filter(l=>l.client===c.nom&&l.statut!=='Annulé');
+      const total = livCli.reduce((s,l)=>s+l.montant,0);
+      const nomB64 = btoa(unescape(encodeURIComponent(c.nom)));
+      return `<div class="client-card" onclick="ouvrirFicheClientB64('${nomB64}')">
+        <div class="client-nom">👤 ${c.nom}</div>
+        <div class="client-meta">${c.tel?'📞 '+c.tel+' · ':''} ${livCli.length} livraison${livCli.length>1?'s':''} · ${fmt(total)} FCFA</div>
+      </div>`;
+    }).join('');
+  }
+
+  window.filtrerClients = function() {
+    const val = document.getElementById('client-search').value;
+    renderClientsPage(val);
+  }
+
+  window.ouvrirFicheClientB64 = function(b64) {
+    try { ouvrirFicheClient(decodeURIComponent(escape(atob(b64)))); } catch(e) { ouvrirFicheClient(b64); }
+  }
+  window.ouvrirFicheClient = function(nom) {
+    const livCli = livraisons.filter(l=>l.client===nom).sort((a,b)=>(b.dateISO||'').localeCompare(a.dateISO||''));
+    const livValides = livCli.filter(l=>l.statut!=='Annulé');
+    const total = livValides.reduce((s,l)=>s+l.montant,0); // montant = frais livraison
+    const stored = Object.values(getClientsMemoire());
+    const clientData = stored.find(c=>c.nom===nom) || livCli[0] || {};
+    const tel = clientData.telClient || clientData.tel || livCli.find(l=>l.telClient)?.telClient || '';
+    const derniere = livCli[0]?.date || '—';
+    document.getElementById('modal-client-nom').textContent = '👤 '+nom;
+    document.getElementById('modal-client-content').innerHTML = `
+      <div class="card" style="margin-bottom:12px">
+        ${tel?`<div class="resume-row"><span class="resume-key">Téléphone</span><span class="resume-val"><a href="tel:${tel}" style="color:#2ecc71">📞 ${tel}</a></span></div>`:''}
+        <div class="resume-row"><span class="resume-key">Nb livraisons</span><span class="resume-val">${livCli.length} (${livValides.length} livrées)</span></div>
+        <div class="resume-row"><span class="resume-key">Total payé</span><span class="resume-val" style="color:#2ecc71">${fmt(total)} FCFA</span></div>
+        <div class="resume-row"><span class="resume-key">Dernière livraison</span><span class="resume-val">${derniere}</span></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Historique des livraisons</div>
+      ${!livCli.length?'<div class="empty-state">Aucune livraison</div>':livCli.map(l=>`
+        <div class="item" style="margin-bottom:8px">
+          <div class="item-top">
+            <span style="font-size:13px;font-weight:700">📅 ${l.date||'—'} à ${l.heure||'—'}</span>
+            <span class="montant-pos">${fmt(l.montant)} F</span>
+          </div>
+          <div class="item-sub">📍 ${l.depart||'?'} → ${l.arrivee||'?'}</div>
+          ${l.description?`<div class="item-sub">📦 ${l.description}</div>`:''}
+          <div class="item-bottom">
+            ${l.statut==='Livré'?'<span class="badge badge-green">✅ Livré</span>':l.statut==='Annulé'?'<span class="badge badge-red">❌ Annulé</span>':'<span class="badge badge-orange">⏳ En cours</span>'}
+            <span class="item-time">${l.paiement||''}</span>
+          </div>
+        </div>`).join('')}
+    `;
+    document.getElementById('modal-client').classList.add('show');
+  }
+
+  window.fermerModalClient = function() {
+    document.getElementById('modal-client').classList.remove('show');
+  }
+
+  // ─── COMMANDES ───
+  function renderCommandes() {
+    const list = document.getElementById('commandes-list');
+    if (!list) return;
+    const enAttente = commandes.filter(c=>c.statut==='En attente');
+    const autres = commandes.filter(c=>c.statut!=='En attente');
+
+    // Badge notification
+    const badge = document.getElementById('cmd-badge');
+    if (badge) {
+      if (enAttente.length > 0) {
+        badge.style.display='inline';
+        badge.textContent = enAttente.length;
+      } else {
+        badge.style.display='none';
+      }
+    }
+
+    if (!commandes.length) {
+      list.innerHTML='<div class="empty-state">Aucune commande reçue</div>';
+      return;
+    }
+
+    const renderCmd = (c, isNew) => {
+      const multi = c.colisTotal > 1 ? ` <span class="groupe-badge">Colis ${c.colisIndex}/${c.colisTotal}</span>` : '';
+      return `<div class="item" style="${isNew ? 'border-color:rgba(30,108,200,0.5);' : ''}">
+        <div class="item-top">
+          <span class="item-name">${c.client}${multi}</span>
+          ${c.montant ? `<span class="montant-pos">+${fmt(c.montant)} FCFA</span>` : '<span style="font-size:12px;color:var(--gray-500)">Sur devis</span>'}
+        </div>
+        <div style="margin-bottom:4px"><span class="suivi-badge">${c.numeroSuivi||'—'}</span>
+          ${isNew ? '<span style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:6px;padding:2px 8px;font-size:11px;color:#fca5a5;font-weight:700;margin-left:6px">🔔 Nouveau</span>' : ''}
+        </div>
+        <div class="item-sub">📍 ${c.depart} → ${c.arrivee}</div>
+        ${c.telClient ? `<div class="item-sub">📞 Client : <a class="call-link" href="tel:${c.telClient}">${c.telClient}</a></div>` : ''}
+        ${c.telDest ? `<div class="item-sub">📞 Destinataire : <a class="call-link-dest" href="tel:${c.telDest}">${c.telDest}</a></div>` : ''}
+        ${c.description ? `<div class="item-sub">📦 ${c.description}</div>` : ''}
+        ${c.paiementLabel ? `<div style="margin-top:4px"><span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);border-radius:6px;padding:3px 9px;font-size:11px;color:#fdba74;font-weight:600">${c.paiementLabel}</span></div>` : ''}
+        ${c.note ? `<div class="item-sub">💬 ${c.note}</div>` : ''}
+        <div class="item-bottom">
+          <span class="item-time">${c.date} ${c.heure||''}</span>
+          ${c.statut==='En attente' ? `
+            <div style="display:flex;gap:6px">
+              <button class="btn-livré" onclick="accepterCommande('${c.id}')">✅ Accepter</button>
+              <button class="btn-danger" onclick="refuserCommande('${c.id}')">❌ Refuser</button>
+            </div>` :
+            c.statut==='Acceptée' ? '<span class="badge badge-green">✅ Acceptée</span>' :
+            '<span class="badge badge-red">❌ Refusée</span>'
+          }
+        </div>
+      </div>`;
+    };
+
+    let html = '';
+    if (enAttente.length) {
+      html += `<div class="day-header" style="margin-bottom:10px"><span class="day-date">🔔 En attente (${enAttente.length})</span></div>`;
+      html += enAttente.map(c=>renderCmd(c,true)).join('');
+    }
+    if (autres.length) {
+      html += `<div class="day-header" style="margin:14px 0 10px"><span class="day-date" style="color:var(--gray-400)">Traitées (${autres.length})</span></div>`;
+      html += autres.slice(0,20).map(c=>renderCmd(c,false)).join('');
+    }
+    list.innerHTML = html;
+  }
+
+  window.accepterCommande = async function(id) {
+    const c = commandes.find(x=>x.id===id);
+    if (!c) return;
+    showFlash('⏳ Acceptation...','loading');
+    try {
+      // Mettre à jour le statut de la commande
+      await updateDoc(doc(db,'commandes',id),{statut:'Acceptée'});
+      // Créer la livraison correspondante
+      await addDoc(collection(db,'livraisons'),{
+        client: c.client,
+        telClient: c.telClient,
+        depart: c.depart,
+        arrivee: c.arrivee,
+        telDest: c.telDest||'',
+        description: c.description||'',
+        montant: c.montant||0,
+        note: c.note||'',
+        paiementType: c.paiementType||'',
+        paiementLabel: c.paiementLabel||'',
+        paiement: 'Espèces',
+        statut: 'En cours',
+        numeroSuivi: c.numeroSuivi,
+        groupeId: c.groupeId,
+        colisIndex: c.colisIndex,
+        colisTotal: c.colisTotal,
+        date: nowDate(), heure: nowTime(), dateISO: todayISO(),
+        timestamp: Date.now(),
+        source: 'commande_client'
+      });
+      await loadData();
+      renderCommandes();
+      showFlash('✅ Commande acceptée et ajoutée au journal !');
+    } catch(e) { showFlash('❌ Erreur.','error'); }
+  }
+
+  window.refuserCommande = async function(id) {
+    if (!confirm('Refuser cette commande ?')) return;
+    try {
+      await updateDoc(doc(db,'commandes',id),{statut:'Refusée'});
+      await loadData();
+      renderCommandes();
+      showFlash('Commande refusée.');
+    } catch(e) { showFlash('❌ Erreur.','error'); }
+  }
+
+  window.exporterPDF = function() {
+    const now=new Date();
+    const moisNom=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+    const moisStr=now.toISOString().substring(0,7);
+    const livMois=livraisons.filter(l=>l.dateISO&&l.dateISO.startsWith(moisStr));
+    const depMois=depenses.filter(d=>d.dateISO&&d.dateISO.startsWith(moisStr));
+    const totalRec=livMois.reduce((s,l)=>s+l.montant,0);
+    const totalDep=depMois.reduce((s,d)=>s+d.montant,0);
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>GMS — ${moisNom}</title>
+    <style>body{font-family:Arial,sans-serif;padding:20px;color:#333}h1{color:#302b63}
+    .r{display:flex;gap:20px;margin:16px 0}.rc{flex:1;border-radius:8px;padding:12px;text-align:center}
+    .g{background:#e8f5e9;border:1px solid #a5d6a7}.r2{background:#ffebee;border:1px solid #ef9a9a}.b{background:#e3f2fd;border:1px solid #90caf9}
+    .rv{font-size:20px;font-weight:800}.rl{font-size:11px;color:#888;text-transform:uppercase}
+    table{width:100%;border-collapse:collapse;margin:12px 0}th{background:#302b63;color:#fff;padding:8px;font-size:12px;text-align:left}
+    td{padding:7px 8px;font-size:12px;border-bottom:1px solid #eee}tr:nth-child(even){background:#f9f9f9}
+    .footer{text-align:center;color:#999;font-size:11px;margin-top:24px}</style></head><body>
+    <h1>🛵 GMS Livraison v7 — Niamey</h1><p>Rapport : ${moisNom}</p>
+    <div class="r">
+      <div class="rc g"><div class="rv">${fmt(totalRec)} FCFA</div><div class="rl">Recettes</div></div>
+      <div class="rc r2"><div class="rv">${fmt(totalDep)} FCFA</div><div class="rl">Dépenses</div></div>
+      <div class="rc b"><div class="rv">${fmt(totalRec-totalDep)} FCFA</div><div class="rl">Bénéfice</div></div>
+    </div>
+    <h3>Livraisons (${livMois.length})</h3>
+    <table><tr><th>Date</th><th>Client</th><th>Trajet</th><th>Montant</th><th>Statut</th></tr>
+    ${livMois.map(l=>`<tr><td>${l.date}</td><td>${l.client}</td><td>${l.depart}→${l.arrivee}</td><td style="color:green;font-weight:bold">${fmt(l.montant)} F</td><td>${l.statut||'Livré'}</td></tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:#999">Aucune</td></tr>'}
+    </table>
+    <h3>Dépenses (${depMois.length})</h3>
+    <table><tr><th>Date</th><th>Catégorie</th><th>Note</th><th>Montant</th></tr>
+    ${depMois.map(d=>`<tr><td>${d.date}</td><td>${d.categorie}</td><td>${d.note||'—'}</td><td style="color:red;font-weight:bold">-${fmt(d.montant)} F</td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:#999">Aucune</td></tr>'}
+    </table>
+    <div class="footer">Généré le ${nowDate()} — GMS Livraison Niamey</div></body></html>`;
+    const blob=new Blob([html],{type:'text/html'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download='GMS_'+moisStr+'.html'; a.click();
+    URL.revokeObjectURL(url);
+    showFlash('✅ Export téléchargé !');
+  }
+
+  function renderAll() { try { renderAllInner(); } catch(e) { console.error("renderAll error:",e); } }
+  function renderAllInner() {
+    const totalLiv=livraisons.filter(l=>l.statut!=='Annulé').reduce((s,l)=>s+l.montant,0);
+    const totalDep=depenses.reduce((s,d)=>s+d.montant,0);
+    const benefice=totalLiv-totalDep;
+    const todayFR=nowDate();
+    const moisStr=new Date().toISOString().substring(0,7);
+    const livJour=livraisons.filter(l=>l.date===todayFR&&l.statut!=='Annulé');
+    const recJour=livJour.reduce((s,l)=>s+l.montant,0);
+    const recMois=livraisons.filter(l=>l.dateISO&&l.dateISO.startsWith(moisStr)&&l.statut!=='Annulé').reduce((s,l)=>s+l.montant,0);
+
+    // Épargne
+    const epargnes=getEpargnes();
+    const totalEpargne=epargnes.reduce((s,e)=>s+e.montant,0);
+    const epargneObj=getEpargneObjectif();
+    const epargnePct=epargneObj?Math.min(Math.round(totalEpargne/epargneObj*100),100):0;
+    const epargneAtteint=totalEpargne>=epargneObj&&epargneObj>0;
+    const epargnesMois=epargnes.filter(e=>e.dateISO&&e.dateISO.startsWith(moisStr)).reduce((s,e)=>s+e.montant,0);
+
+    // Investissement
+    const invest=getInvestissement();
+    const investPct=invest?Math.min(Math.round(benefice/invest*100),100):0;
+    const investRestant=Math.max(0,invest-benefice);
+
+    // Livraisons restantes pour objectif
+    const obj=getObjectif();
+    const restantFCFA=obj?Math.max(0,obj-recMois):0;
+    const livValid=livraisons.filter(l=>l.statut!=='Annulé');
+    const moyLiv=livValid.length?Math.round(totalLiv/livValid.length):1000;
+    const restanteLiv=obj&&moyLiv?Math.ceil(restantFCFA/moyLiv):null;
+
+    document.getElementById('acc-recettes').textContent=fmt(totalLiv);
+    document.getElementById('acc-depenses').textContent=fmt(totalDep);
+    document.getElementById('acc-benefice').textContent=fmt(benefice)+' FCFA';
+    document.getElementById('acc-benefice-card').className='benefice-card '+(benefice>=0?'pos':'neg');
+    document.getElementById('acc-liv-jour').textContent=livJour.length+' livraison(s)';
+    document.getElementById('acc-rec-jour').textContent=fmt(recJour)+' FCFA';
+    document.getElementById('acc-nb-liv').textContent=livraisons.length;
+    document.getElementById('acc-moy').textContent=livraisons.length?fmt(Math.round(totalLiv/livraisons.length))+' FCFA':'0 FCFA';
+    document.getElementById('acc-restantes').textContent=restanteLiv!==null?(restanteLiv===0?'🎉 Objectif atteint !':restanteLiv+' livraison(s)'):'—';
+    document.getElementById('acc-epargne').textContent=fmt(totalEpargne)+' FCFA';
+    document.getElementById('epargne-bar').style.width=epargnePct+'%';
+    document.getElementById('epargne-bar').className='progress-fill'+(epargneAtteint?' atteint':'');
+    document.getElementById('epargne-pct').textContent=epargneObj?epargnePct+'% '+(epargneAtteint?'🎉 Objectif atteint !':''):'Aucun objectif épargne';
+
+    renderObjectif(recMois);
+    renderAlerteVidange();
+
+    // Alerte nouvelles commandes
+    const enAttente = commandes.filter(c=>c.statut==='En attente');
+    const alertEl = document.getElementById('commandes-alert');
+    const alertTxt = document.getElementById('commandes-alert-txt');
+    if (alertEl) {
+      if (enAttente.length > 0) {
+        alertEl.style.display='block';
+        if (alertTxt) alertTxt.textContent = enAttente.length+' commande'+(enAttente.length>1?'s':'')+' en attente de votre confirmation';
+      } else {
+        alertEl.style.display='none';
+      }
+    }
+
+    // Livraisons par jour (triées par date décroissante)
+    const parJour={};
+    livraisons.filter(l=>l.statut!=='Annulé').forEach(l=>{ if(!parJour[l.dateISO||l.date])parJour[l.dateISO||l.date]={count:0,total:0,dateFR:l.date}; parJour[l.dateISO||l.date].count++; parJour[l.dateISO||l.date].total+=l.montant; });
+    const pjEl=document.getElementById('acc-par-jour');
+    const entries=Object.entries(parJour).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,7);
+    pjEl.innerHTML=!entries.length?'<div class="empty-state">Aucune livraison</div>'
+      :entries.map(([,s])=>`<div class="day-header"><span class="day-date">📅 ${s.dateFR||'—'}</span><span class="day-stats">${s.count} liv.</span><span class="day-total">${fmt(s.total)} FCFA</span></div>`).join('');
+
+    renderJournal();
+
+    // Bilan
+    document.getElementById('bil-recettes').textContent=fmt(totalLiv);
+    document.getElementById('bil-depenses').textContent=fmt(totalDep);
+    document.getElementById('bil-benefice').textContent=fmt(benefice)+' FCFA';
+    document.getElementById('bilan-count').textContent=depenses.length;
+    document.getElementById('bil-benefice-card').className='benefice-card '+(benefice>=0?'pos':'neg');
+    document.getElementById('bil-epargne').textContent=fmt(totalEpargne)+' FCFA';
+    document.getElementById('bil-epargne-mois').textContent=fmt(epargnesMois)+' FCFA';
+    document.getElementById('bil-epargne-obj').textContent=fmt(epargneObj)+' FCFA';
+    document.getElementById('invest-cout').textContent=fmt(invest)+' FCFA';
+    document.getElementById('invest-benefices').textContent=fmt(Math.max(0,benefice))+' FCFA';
+    document.getElementById('invest-restant').textContent=fmt(investRestant)+' FCFA';
+    document.getElementById('invest-bar').style.width=investPct+'%';
+    document.getElementById('invest-pct').textContent=invest?investPct+'% remboursé'+(investPct>=100?' 🎉':''):'Aucun investissement défini';
+
+    const bList=document.getElementById('bilan-list');
+    bList.innerHTML=!depenses.length?'<div class="empty-state">Aucune dépense</div>'
+      :depenses.map(d=>`<div class="item"><div class="item-top"><span class="badge badge-red">${d.categorie}</span><span class="montant-neg">-${fmt(d.montant)} FCFA</span></div>${d.note?`<div class="item-sub">💬 ${d.note}</div>`:''}<div class="item-bottom"><span class="item-time">${d.date}</span><button class="btn-danger" onclick="supprimerDepense('${d.id}')">🗑</button></div></div>`).join('');
+
+    // Comparaison mois
+    const now2 = new Date();
+    const moisCourant = now2.toISOString().substring(0,7);
+    const prevDate = new Date(now2.getFullYear(), now2.getMonth()-1, 1);
+    const moisPrec = prevDate.toISOString().substring(0,7);
+    const moisNomsCourt = {'01':'Jan','02':'Fév','03':'Mar','04':'Avr','05':'Mai','06':'Juin','07':'Juil','08':'Août','09':'Sep','10':'Oct','11':'Nov','12':'Déc'};
+    const nomC = moisNomsCourt[moisCourant.split('-')[1]] + ' ' + moisCourant.split('-')[0];
+    const nomP = moisNomsCourt[moisPrec.split('-')[1]] + ' ' + moisPrec.split('-')[0];
+    const recC = livraisons.filter(l=>l.dateISO&&l.dateISO.startsWith(moisCourant)&&l.statut!=='Annulé').reduce((s,l)=>s+l.montant,0);
+    const depC = depenses.filter(d=>d.dateISO&&d.dateISO.startsWith(moisCourant)).reduce((s,d)=>s+d.montant,0);
+    const recP = livraisons.filter(l=>l.dateISO&&l.dateISO.startsWith(moisPrec)&&l.statut!=='Annulé').reduce((s,l)=>s+l.montant,0);
+    const depP = depenses.filter(d=>d.dateISO&&d.dateISO.startsWith(moisPrec)).reduce((s,d)=>s+d.montant,0);
+    const benC = recC-depC, benP = recP-depP;
+    const diffRec = recC-recP, diffBen = benC-benP;
+    const arrow = v=>v>0?'▲':v<0?'▼':'─';
+    const col = v=>v>0?'#2ecc71':v<0?'#e74c3c':'rgba(255,255,255,0.5)';
+    const compEl = document.getElementById('comp-mois');
+    if (compEl) compEl.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.25);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:6px">${nomC}</div>
+          <div style="font-size:15px;font-weight:800;color:#2ecc71">${fmt(recC)} F</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4)">Recettes</div>
+          <div style="font-size:13px;font-weight:700;margin-top:6px;color:${benC>=0?'#2ecc71':'#e74c3c'}">${fmt(benC)} F bénéf.</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:6px">${nomP}</div>
+          <div style="font-size:15px;font-weight:800;color:#74b9ff">${fmt(recP)} F</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.4)">Recettes</div>
+          <div style="font-size:13px;font-weight:700;margin-top:6px;color:${benP>=0?'#2ecc71':'#e74c3c'}">${fmt(benP)} F bénéf.</div>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 12px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+          <span style="color:rgba(255,255,255,0.55)">Évolution recettes</span>
+          <span style="font-weight:700;color:${col(diffRec)}">${arrow(diffRec)} ${fmt(Math.abs(diffRec))} FCFA</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px">
+          <span style="color:rgba(255,255,255,0.55)">Évolution bénéfice</span>
+          <span style="font-weight:700;color:${col(diffBen)}">${arrow(diffBen)} ${fmt(Math.abs(diffBen))} FCFA</span>
+        </div>
+      </div>`;
+  } // end renderAllInner
+
+  window.renderJournal = function() {
+    const filtered=filtrerLivraisons();
+    const totalFiltre=filtered.filter(l=>l.statut!=='Annulé').reduce((s,l)=>s+l.montant,0);
+    document.getElementById('journal-count').textContent=filtered.length+' — '+fmt(totalFiltre)+' FCFA';
+    const list=document.getElementById('journal-list');
+    if(!filtered.length) { list.innerHTML='<div class="empty-state">📦 Aucune livraison</div>'; return; }
+
+    if (currentFilter==='zone') {
+      // Grouper par zone (arrivée) pour optimiser les tournées
+      const parZone={};
+      filtered.filter(l=>l.statut==='En cours'||l.statut==='En route').forEach(l=>{
+        const z=l.arrivee||'Inconnu';
+        if(!parZone[z]) parZone[z]=[];
+        parZone[z].push(l);
+      });
+      if (!Object.keys(parZone).length) { list.innerHTML='<div class="empty-state">Aucune livraison en cours</div>'; return; }
+      list.innerHTML='<div style="background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.3);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#a29bfe">🗺️ Livraisons groupées par zone — optimisez votre tournée !</div>' +
+        Object.entries(parZone).sort((a,b)=>b[1].length-a[1].length).map(([zone,items])=>`
+          <div style="margin-bottom:14px">
+            <div class="day-header"><span class="day-date">📍 ${zone}</span><span class="day-stats">${items.length} colis</span><span class="day-total">${fmt(items.reduce((s,l)=>s+l.montant,0))} FCFA</span></div>
+            ${items.map(l=>`<div class="item">
+              <div class="item-top"><span class="item-name">${l.client}</span><span class="montant-pos">+${fmt(l.montant)} FCFA</span></div>
+              ${l.numeroSuivi?`<div style="margin-bottom:4px"><span class="suivi-badge">${l.numeroSuivi}</span></div>`:''}
+              ${l.telDest?`<div class="item-sub">📞 Dest : <a class="call-link-dest" href="tel:${l.telDest}">${l.telDest}</a></div>`:''}
+              <div class="item-actions">
+                <button class="btn-livré" onclick="marquerLivre('${l.id}')">✅ Livré</button>
+                <button class="btn-enroute" onclick="marquerEnRoute('${l.id}')">🛵 En route</button>
+                ${l.telDest?`<button class="btn-wa-dest" onclick="envoyerWADestinaire('${l.id}')">💬 WA</button>`:''}
+              </div>
+            </div>`).join('')}
+          </div>`).join('');
+      return;
+    }
+
+    const parJour={};
+    filtered.forEach(l=>{ if(!parJour[l.date])parJour[l.date]=[]; parJour[l.date].push(l); });
+    list.innerHTML=Object.entries(parJour).map(([date,items])=>{
+      const totalJour=items.reduce((s,l)=>s+l.montant,0);
+      const itemsHTML=items.map(l=>`
+        <div class="item">
+          <div class="item-top">
+            <span class="item-name">${l.client}${l.colisTotal>1?` <span class="groupe-badge">Colis ${l.colisIndex}/${l.colisTotal}</span>`:''}</span>
+            <div style="text-align:right">
+              <div class="montant-pos">+${fmt(l.montant)} FCFA</div>
+              ${l.montantColis?`<div style="font-size:11px;color:var(--gray-400)">Colis: ${fmt(l.montantColis)} F</div>`:''}
+            </div>
+          </div>
+          ${l.numeroSuivi?`<div style="margin-bottom:4px"><span class="suivi-badge">${l.numeroSuivi}</span>${l.livreur?` <span class="badge badge-blue">🛵 ${l.livreur}</span>`:''}</div>`:''}
+          <div class="item-sub">📍 ${l.depart} → ${l.arrivee}</div>
+          ${l.telClient?`<div class="item-sub">📞 Client : <a class="call-link" href="tel:${l.telClient}">${l.telClient}</a></div>`:''}
+          ${l.telDest?`<div class="item-sub">📞 Destinataire : <a class="call-link-dest" href="tel:${l.telDest}">${l.telDest}</a></div>`:''}
+          ${l.description?`<div class="item-sub">📦 ${l.description}</div>`:''}
+          ${l.note?`<div class="item-sub">💬 ${l.note}</div>`:''}
+          ${l.paiementLabel?`<div style="margin-top:2px"><span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:6px;padding:2px 8px;font-size:11px;color:#fdba74;font-weight:600">${l.paiementLabel}</span></div>`:''}
+          <div class="item-bottom">${statutBadge(l.statut||'Livré')}<span class="badge badge-purple">${l.paiement}</span><span class="item-time">${l.heure||''}</span></div>
+          <div class="item-actions">
+            ${l.statut==='En cours'?`<button class="btn-livré" onclick="marquerLivre('${l.id}')">✅ Livré</button><button class="btn-enroute" onclick="marquerEnRoute('${l.id}')">🛵 En route</button>`:''}
+            ${l.telDest?`<button class="btn-wa-dest" onclick="envoyerWADestinaire('${l.id}')">💬 WA Dest.</button><button class="btn-sms-dest" onclick="envoyerSMSDestinaire('${l.id}')">📱 SMS</button>`:''}
+            ${l.telClient?`<button class="btn-wa-client" onclick="envoyerWAClient('${l.id}')">💬 WA Client</button><button class="btn-sms-client" onclick="envoyerSMSClient('${l.id}')">📱 SMS</button>`:''}
+            <button class="btn-edit" onclick="ouvrirModification('${l.id}')">✏️</button>
+            <button class="btn-danger" onclick="demanderSuppression('${l.id}')">🗑</button>
+          </div>
+        </div>`).join('');
+      return `<div class="day-header"><span class="day-date">📅 ${date}</span><span class="day-stats">${items.length} liv.</span><span class="day-total">${fmt(totalJour)} FCFA</span></div>${itemsHTML}`;
+    }).join('');
+  }
+
+  // Ouvrir l'app immédiatement — toujours
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  try { renderAll(); } catch(e) { console.error('renderAll:',e); }
+  try { renderRecurrents(); } catch(e) {}
+  try { renderAlerteVidange(); } catch(e) {}
+  try { renderCarburant(); } catch(e) {}
+  try { initColisForm(); } catch(e) {}
+  try { remplirSelectLivreur(); } catch(e) {}
+
+  // Enregistrer Service Worker + notifications
+  enregistrerServiceWorker();
+
+  // Charger Firebase en arrière-plan
+  loadData();
+
+  // Écoute temps réel pour les commandes
+  try { ecouterCommandes(); } catch(e) { console.log('Listener error:', e); }
+
+  // Refresh standard toutes les 30s (backup)
+  setInterval(loadData, 30000);
+  // Vérifier alertes 2h toutes les 5 minutes
+  setInterval(verifierAlertes2h, 5*60*1000);
+
+  // Afficher bouton "Ajouter à l'écran d'accueil" sur iOS
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.navigator.standalone;
+  if (isIOS && !isStandalone) {
+    setTimeout(()=>{
+      showFlash("📱 Pour les notifications iPhone : Safari → Partager → Sur l’écran d’accueil", "warning");
+    }, 3000);
+  }
+</script>
+</body>
+</html>
