@@ -490,8 +490,11 @@
       </div>
 
       <label>Téléphone du client</label>
-      <div class="tel-row">
-        <input id="f-tel-client" type="tel" placeholder="Ex: 90000000" inputmode="numeric">
+      <div class="tel-with-flag">
+        <select class="flag-select" id="flag-f-tel-client">
+          <option value="+227" selected>🇳🇪 +227</option>
+        </select>
+        <input id="f-tel-client" type="tel" placeholder="Ex: 90000000" inputmode="numeric" style="margin-bottom:0">
         <button class="btn-contact" onclick="chercherContact('f-tel-client','f-client')">👤</button>
         <button class="btn-call" onclick="appeler('f-tel-client')">📞</button>
       </div>
@@ -858,6 +861,86 @@
   } catch(e) {}
 
   const fmt     = n => Number(n||0).toLocaleString('fr-FR');
+
+  // ─── INDICATIFS PAYS ───
+  const PAYS = [
+    {code:'NE',flag:'🇳🇪',name:'Niger',dial:'+227'},
+    {code:'DZ',flag:'🇩🇿',name:'Algérie',dial:'+213'},
+    {code:'BJ',flag:'🇧🇯',name:'Bénin',dial:'+229'},
+    {code:'BF',flag:'🇧🇫',name:'Burkina Faso',dial:'+226'},
+    {code:'CM',flag:'🇨🇲',name:'Cameroun',dial:'+237'},
+    {code:'CF',flag:'🇨🇫',name:'Centrafrique',dial:'+236'},
+    {code:'KM',flag:'🇰🇲',name:'Comores',dial:'+269'},
+    {code:'CG',flag:'🇨🇬',name:'Congo',dial:'+242'},
+    {code:'CD',flag:'🇨🇩',name:'Congo RDC',dial:'+243'},
+    {code:'CI',flag:'🇨🇮',name:"Côte d'Ivoire",dial:'+225'},
+    {code:'DJ',flag:'🇩🇯',name:'Djibouti',dial:'+253'},
+    {code:'EG',flag:'🇪🇬',name:'Égypte',dial:'+20'},
+    {code:'GA',flag:'🇬🇦',name:'Gabon',dial:'+241'},
+    {code:'GM',flag:'🇬🇲',name:'Gambie',dial:'+220'},
+    {code:'GH',flag:'🇬🇭',name:'Ghana',dial:'+233'},
+    {code:'GN',flag:'🇬🇳',name:'Guinée',dial:'+224'},
+    {code:'GQ',flag:'🇬🇶',name:'Guinée Équat.',dial:'+240'},
+    {code:'GW',flag:'🇬🇼',name:'Guinée-Bissau',dial:'+245'},
+    {code:'KE',flag:'🇰🇪',name:'Kenya',dial:'+254'},
+    {code:'LB',flag:'🇱🇧',name:'Liban',dial:'+961'},
+    {code:'LR',flag:'🇱🇷',name:'Liberia',dial:'+231'},
+    {code:'LY',flag:'🇱🇾',name:'Libye',dial:'+218'},
+    {code:'MG',flag:'🇲🇬',name:'Madagascar',dial:'+261'},
+    {code:'MW',flag:'🇲🇼',name:'Malawi',dial:'+265'},
+    {code:'ML',flag:'🇲🇱',name:'Mali',dial:'+223'},
+    {code:'MR',flag:'🇲🇷',name:'Mauritanie',dial:'+222'},
+    {code:'MA',flag:'🇲🇦',name:'Maroc',dial:'+212'},
+    {code:'MZ',flag:'🇲🇿',name:'Mozambique',dial:'+258'},
+    {code:'NA',flag:'🇳🇦',name:'Namibie',dial:'+264'},
+    {code:'NG',flag:'🇳🇬',name:'Nigeria',dial:'+234'},
+    {code:'UG',flag:'🇺🇬',name:'Ouganda',dial:'+256'},
+    {code:'RW',flag:'🇷🇼',name:'Rwanda',dial:'+250'},
+    {code:'ST',flag:'🇸🇹',name:'São Tomé',dial:'+239'},
+    {code:'SN',flag:'🇸🇳',name:'Sénégal',dial:'+221'},
+    {code:'SL',flag:'🇸🇱',name:'Sierra Leone',dial:'+232'},
+    {code:'SO',flag:'🇸🇴',name:'Somalie',dial:'+252'},
+    {code:'SD',flag:'🇸🇩',name:'Soudan',dial:'+249'},
+    {code:'SS',flag:'🇸🇸',name:'Soudan du Sud',dial:'+211'},
+    {code:'TZ',flag:'🇹🇿',name:'Tanzanie',dial:'+255'},
+    {code:'TD',flag:'🇹🇩',name:'Tchad',dial:'+235'},
+    {code:'TG',flag:'🇹🇬',name:'Togo',dial:'+228'},
+    {code:'TN',flag:'🇹🇳',name:'Tunisie',dial:'+216'},
+    {code:'ZM',flag:'🇿🇲',name:'Zambie',dial:'+260'},
+    {code:'ZW',flag:'🇿🇼',name:'Zimbabwe',dial:'+263'},
+    {code:'FR',flag:'🇫🇷',name:'France',dial:'+33'},
+    {code:'BE',flag:'🇧🇪',name:'Belgique',dial:'+32'},
+    {code:'CH',flag:'🇨🇭',name:'Suisse',dial:'+41'},
+    {code:'CA',flag:'🇨🇦',name:'Canada',dial:'+1'},
+    {code:'US',flag:'🇺🇸',name:'États-Unis',dial:'+1'},
+    {code:'GB',flag:'🇬🇧',name:'Royaume-Uni',dial:'+44'},
+    {code:'DE',flag:'🇩🇪',name:'Allemagne',dial:'+49'},
+    {code:'IT',flag:'🇮🇹',name:'Italie',dial:'+39'},
+    {code:'ES',flag:'🇪🇸',name:'Espagne',dial:'+34'},
+    {code:'PT',flag:'🇵🇹',name:'Portugal',dial:'+351'},
+    {code:'CN',flag:'🇨🇳',name:'Chine',dial:'+86'},
+    {code:'AE',flag:'🇦🇪',name:'Émirats Arabes',dial:'+971'},
+    {code:'SA',flag:'🇸🇦',name:'Arabie Saoudite',dial:'+966'},
+  ];
+
+  function paysSelectHTML(inputId, defaultDial='+227') {
+    return `<select class="flag-select" id="flag-${inputId}" onchange="updateFlagLabel('${inputId}')">
+      ${PAYS.map(p=>`<option value="${p.dial}" ${p.dial===defaultDial?'selected':''}>${p.flag} ${p.dial}</option>`).join('')}
+    </select>`;
+  }
+
+  window.updateFlagLabel = function(inputId) {
+    // Rien à faire — la valeur est déjà dans le select
+  }
+
+  function getFullTel(inputId) {
+    const num = (document.getElementById(inputId)?.value||'').replace(/\D/g,'');
+    const dial = (document.getElementById('flag-'+inputId)?.value||'+227').replace('+','');
+    if (!num) return '';
+    // Éviter double indicatif
+    if (num.startsWith(dial)) return num;
+    return dial + num;
+  }
   const nowDate = () => new Date().toLocaleDateString('fr-FR');
   const nowTime = () => new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   const todayISO = () => new Date().toISOString().split('T')[0];
@@ -1067,7 +1150,7 @@ Bonjour, votre colis envoyé par ${l.client} est en route vers ${l.arrivee}.
 Notre livreur arrive bientôt. Veuillez vous tenir disponible.
 
 GMS Livraison Niamey 📞`;
-        window.open(`https://wa.me/${formatTel(l.telDest)}?text=${encodeURIComponent(msg)}`,'_blank');
+        window.open(`https://wa.me/${l.telDest.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
       }
     } catch(e) {}
   }
@@ -1306,8 +1389,11 @@ GMS Livraison Niamey 📞`;
         <div class="ac-list" id="ac-colis-arrivee-${idx}"></div>
       </div>
       <label>Numéro destinataire</label>
-      <div class="tel-row" style="margin-bottom:12px">
-        <input id="colis-tel-${idx}" type="tel" placeholder="Ex: 90000000" inputmode="numeric" style="margin-bottom:0">
+      <div class="tel-with-flag" style="margin-bottom:12px">
+        <select class="flag-select" id="flag-colis-tel-${idx}">
+          <option value="+227" selected>🇳🇪 +227</option>
+        </select>
+        <input id="colis-tel-${idx}" type="tel" placeholder="Ex: 90000000" inputmode="numeric" style="margin-bottom:0;flex:1">
         <button class="btn-call" onclick="appeler('colis-tel-${idx}')">📞</button>
       </div>
       <label>Description du colis</label>
@@ -1324,7 +1410,10 @@ GMS Livraison Niamey 📞`;
     const div = document.createElement('div');
     div.innerHTML = colisHTML(colisCounter);
     container.appendChild(div.firstElementChild);
+    const idx = colisCounter;
     colisCounter++;
+    // Remplir le select pays du destinataire
+    setTimeout(()=>remplirSelectPays('flag-colis-tel-'+idx), 50);
     // Ajouter listener sur le montant pour mise à jour total
     const montantInput = document.getElementById('colis-montant-'+(colisCounter-1));
     if (montantInput) montantInput.addEventListener('input', mettreAJourTotalColis);
@@ -1358,19 +1447,30 @@ GMS Livraison Niamey 📞`;
     items.forEach(item => {
       const id = item.id.replace('colis-','');
       const arrivee = document.getElementById('colis-arrivee-'+id)?.value.trim() || '';
-      const tel = document.getElementById('colis-tel-'+id)?.value.trim() || '';
+      const telRaw = document.getElementById('colis-tel-'+id)?.value.trim() || '';
+      const indicatif = document.getElementById('flag-colis-tel-'+id)?.value || '+227';
+      const tel = telRaw ? formatTel(telRaw, indicatif) : '';
       const desc = document.getElementById('colis-desc-'+id)?.value.trim() || '';
       const montant = parseInt(document.getElementById('colis-montant-'+id)?.value || '0') || 0;
       const frais = parseInt(document.getElementById('colis-frais-'+id)?.value || '0') || 0;
-      result.push({ arrivee, tel, desc, montant, frais });
+      result.push({ arrivee, tel, telRaw, indicatif, desc, montant, frais });
     });
     return result;
+  }
+
+  function remplirSelectPays(selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel || sel.options.length > 2) return; // Déjà rempli
+    sel.innerHTML = PAYS.map(p=>`<option value="${p.dial}">${p.flag} ${p.dial}</option>`).join('');
+    sel.value = '+227'; // Défaut Niger
   }
 
   function initColisForm() {
     colisCounter = 0;
     document.getElementById('colis-container').innerHTML = '';
     ajouterColis(); // Toujours au moins 1 colis
+    // Remplir le select pays du client
+    setTimeout(()=>remplirSelectPays('flag-f-tel-client'), 100);
   }
 
   // ─── AUTOCOMPLETE ───
@@ -1457,11 +1557,12 @@ GMS Livraison Niamey 📞`;
   }
 
   // ─── WHATSAPP + SMS ───
-  function formatTel(tel) {
-    // Ajoute indicatif Niger 227 si numéro local
+  function formatTel(tel, indicatif='227') {
     const t = (tel||'').replace(/\D/g,'');
-    if (t.startsWith('227')) return t;
-    return '227' + t;
+    if (!t) return '';
+    const ind = indicatif.replace('+','');
+    if (t.startsWith(ind)) return t;
+    return ind + t;
   }
   window.envoyerWADestinaire = function(id) {
     const l = livraisons.find(l=>l.id===id);
@@ -1473,7 +1574,7 @@ Bonjour, votre colis envoyé par ${l.client} est en cours de livraison vers ${l.
 Notre livreur arrive bientôt. Veuillez vous tenir disponible.
 
 GMS Livraison Niamey 📞`;
-    window.open(`https://wa.me/${formatTel(l.telDest)}?text=${encodeURIComponent(msg)}`,'_blank');
+    window.open(`https://wa.me/${l.telDest.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
   }
   window.envoyerSMSDestinaire = function(id) {
     const l = livraisons.find(l=>l.id===id);
@@ -1494,7 +1595,11 @@ GMS Livraison Niamey 📞`;
     if (l.groupeId) {
       // Multi-colis : chercher tous les colis du même groupe
       const groupe = livraisons.filter(x=>x.groupeId===l.groupeId).sort((a,b)=>(a.colisIndex||0)-(b.colisIndex||0));
-      const listeDestinations = groupe.map((c,i)=>`📦 Colis ${i+1} \u2192 ${c.arrivee}`).join('\n');
+      const listeDestinations = groupe.map((c,i)=>{
+        let ligne = `📦 Colis ${i+1} → ${c.arrivee}`;
+        if (c.telDest) ligne += ` | 📞 ${c.telDest}`;
+        return ligne;
+      }).join('\n');
       msg = `🛵 GMS Livraison Niamey
 
 Bonjour ${l.client}, vos colis ont bien été livrés !
@@ -1518,7 +1623,7 @@ Bonjour ${l.client}, votre colis a bien été livré !
 
 Merci de votre confiance ! 🙏`;
     }
-    window.open(`https://wa.me/${formatTel(l.telClient)}?text=${encodeURIComponent(msg)}`,'_blank');
+    window.open(`https://wa.me/${l.telClient.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
   }
   window.envoyerSMSClient = function(id) {
     const l = livraisons.find(l=>l.id===id);
@@ -1563,7 +1668,7 @@ Bonjour, votre colis envoyé par ${l.client} est en route vers ${l.arrivee}.
 Notre livreur arrive bientôt. Veuillez vous tenir disponible.
 
 GMS Livraison Niamey 📞`;
-          window.open(`https://wa.me/${formatTel(l.telDest)}?text=${encodeURIComponent(msg)}`,'_blank');
+          window.open(`https://wa.me/${l.telDest.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
         }, 1000);
       }
     } catch(e) { showFlash('❌ Erreur.','error'); }
@@ -1761,7 +1866,9 @@ GMS Livraison Niamey 📞`;
     if(colisSansFrais) { showFlash('⚠️ Chaque colis doit avoir des frais de livraison','error'); return; }
 
     showFlash('⏳ Enregistrement...','loading'); setSyncStatus('syncing');
-    sauvegarderClient(client, telClient);
+    const indicatifClient = document.getElementById('flag-f-tel-client')?.value || '+227';
+    const telClientFull = telClient ? formatTel(telClient, indicatifClient) : '';
+    sauvegarderClient(client, telClientFull||telClient);
     ajouterQuartierCustom(depart);
     colisData.forEach(c=>ajouterQuartierCustom(c.arrivee));
 
@@ -1787,7 +1894,7 @@ GMS Livraison Niamey 📞`;
         const livreur = document.getElementById('f-livreur').value || '';
         const promises = colisData.map((c, i) =>
           addDoc(collection(db,'livraisons'),{
-            client, telClient, depart,
+            client, telClient: telClientFull||telClient, depart,
             arrivee: c.arrivee,
             telDest: c.tel,
             description: c.desc,
@@ -2315,6 +2422,9 @@ GMS Livraison Niamey 📞`;
   try { renderCarburant(); } catch(e) {}
   try { initColisForm(); } catch(e) {}
   try { remplirSelectLivreur(); } catch(e) {}
+
+  // Remplir select pays du client
+  setTimeout(()=>remplirSelectPays('flag-f-tel-client'), 200);
 
   // Enregistrer Service Worker + notifications
   enregistrerServiceWorker();
