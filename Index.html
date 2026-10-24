@@ -1143,13 +1143,8 @@
       renderLivreurScreen(nomLivreur);
       // WA automatique au destinataire
       if (l.telDest) {
-        const msg = `🛵 GMS Livraison Niamey
-
-Bonjour, votre colis envoyé par ${l.client} est en route vers ${l.arrivee}.
-
-Notre livreur arrive bientôt. Veuillez vous tenir disponible.
-
-GMS Livraison Niamey 📞`;
+        const sal = salutation();
+        const msg = `🛵 GMS Livraison Niamey\n\n${sal}, votre colis envoyé par ${l.client} est en route.\n\n📍 Trajet : ${l.depart} → ${l.arrivee}\n\nNotre livreur arrive bientôt. Veuillez vous tenir disponible.\n\nGMS Livraison Niamey 📞`;
         window.open(`https://wa.me/${l.telDest.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
       }
     } catch(e) {}
@@ -1568,10 +1563,13 @@ GMS Livraison Niamey 📞`;
     return ind + t;
   }
 
-  // Retourne "Bonjour" ou "Bonsoir" selon l'heure
+  // Retourne "Bonjour" (5h-14h59) ou "Bonsoir" (15h-4h59)
   function salutation() {
     const h = new Date().getHours();
-    return (h >= 5 && h < 15) ? 'Bonjour' : 'Bonsoir';
+    // Bonjour : 5h00 inclus jusqu'à 14h59
+    // Bonsoir : 15h00 jusqu'à 4h59 (minuit compris)
+    if (h >= 5 && h <= 14) return 'Bonjour';
+    return 'Bonsoir';
   }
   window.envoyerWADestinaire = function(id) {
     const l = livraisons.find(l=>l.id===id);
@@ -1656,13 +1654,8 @@ GMS Livraison Niamey 📞`;
       // WA automatique au destinataire
       if (l.telDest) {
         setTimeout(()=>{
-          const msg = `🛵 GMS Livraison Niamey
-
-Bonjour, votre colis envoyé par ${l.client} est en route vers ${l.arrivee}.
-
-Notre livreur arrive bientôt. Veuillez vous tenir disponible.
-
-GMS Livraison Niamey 📞`;
+          const sal = salutation();
+          const msg = `🛵 GMS Livraison Niamey\n\n${sal}, votre colis envoyé par ${l.client} est en route.\n\n📍 Trajet : ${l.depart} → ${l.arrivee}\n\nNotre livreur arrive bientôt. Veuillez vous tenir disponible.\n\nGMS Livraison Niamey 📞`;
           window.open(`https://wa.me/${l.telDest.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank');
         }, 1000);
       }
